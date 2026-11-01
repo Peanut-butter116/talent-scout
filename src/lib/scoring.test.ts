@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SEED_CANDIDATES } from '../data/candidates';
 import { SEED_ROLES } from '../data/roles';
 import type { Candidate, Role } from '../types';
-import { cautiousFit, checkMustHaves, confidenceFor, rankCandidates, roleAverageFit, scoreCandidate } from './scoring';
+import { cautiousFit, checkMustHaves, confidenceFor, NEUTRAL_FIT, rankCandidates, scoreCandidate } from './scoring';
 import { setWeight } from './weights';
 
 const role: Role = {
@@ -147,14 +147,21 @@ describe('rankCandidates', () => {
 describe('cautious fit', () => {
   const ai = SEED_ROLES.find((r) => r.id === 'ai-eng')!;
 
-  it('equals raw fit at full coverage and pulls thin profiles towards the role average', () => {
-    const full = { fit: 90, coverage: 100 } as Parameters<typeof cautiousFit>[0];
-    expect(cautiousFit(full, 60)).toBeCloseTo(90);
-    const thin = { fit: 90, coverage: 25 } as Parameters<typeof cautiousFit>[0];
-    expect(cautiousFit(thin, 60)).toBeCloseTo(0.25 * 90 + 0.75 * 60);
+  it('equals raw fit at full coverage and shrinks thin profiles towards a neutral 50', () => {
+    expect(NEUTRAL_FIT).toBe(50);
+    expect(cautiousFit({ fit: 90, coverage: 100 })).toBeCloseTo(90);
+    expect(cautiousFit({ fit: 90, coverage: 25 })).toBeCloseTo(0.25 * 90 + 0.75 * 50);
+    expect(cautiousFit({ fit: 20, coverage: 25 })).toBeCloseTo(0.25 * 20 + 0.75 * 50);
+    expect(cautiousFit({ fit: null, coverage: 0 })).toBe(50);
   });
 
-  it('Alexis Brandt (thin evidence) is no longer top 3 by default, but is on raw fit', () => {
+  it('does not depend on the other candidates', () => {
+    const alone = rankCandidates(SEED_CANDIDATES.filter((c) => c.id === 'c-alexis'), ai)[0];
+    const all = rankCandidates(SEED_CANDIDATES, ai).find((r) => r.candidate.id === 'c-alexis')!;
+    expect(alone.cautiousFit).toBeCloseTo(all.cautiousFit);
+  });
+
+  it('Alexis Brandt (thin evidence) is not top 3 by default, but is on raw fit', () => {
     const cautious = rankCandidates(SEED_CANDIDATES, ai).map((r) => r.candidate.id);
     const raw = rankCandidates(SEED_CANDIDATES, ai, 'raw').map((r) => r.candidate.id);
     expect(cautious.indexOf('c-alexis')).toBeGreaterThanOrEqual(3);
@@ -163,19 +170,13 @@ describe('cautious fit', () => {
 
   it('tags candidates under 40% coverage as needing more evidence', () => {
     const ranked = rankCandidates(SEED_CANDIDATES, ai);
-    const alexis = ranked.find((r) => r.candidate.id === 'c-alexis')!;
-    const sam = ranked.find((r) => r.candidate.id === 'c-sam')!;
-    expect(alexis.needsMoreEvidence).toBe(true);
-    expect(sam.needsMoreEvidence).toBe(false);
+    expect(ranked.find((r) => r.candidate.id === 'c-alexis')!.needsMoreEvidence).toBe(true);
+    expect(ranked.find((r) => r.candidate.id === 'c-sam')!.needsMoreEvidence).toBe(false);
   });
 
   it('never changes raw fit', () => {
     for (const r of rankCandidates(SEED_CANDIDATES, ai)) {
       expect(r.score.fit).toBe(scoreCandidate(r.candidate, ai).fit);
     }
-  });
-
-  it('role average ignores candidates with no evidence', () => {
-    expect(roleAverageFit([{ fit: 80 }, { fit: null }, { fit: 60 }] as Parameters<typeof roleAverageFit>[0])).toBe(70);
   });
 });

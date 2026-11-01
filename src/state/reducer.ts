@@ -3,6 +3,7 @@ import { SEED_CHATS } from '../data/chats';
 import { SEED_ROLES } from '../data/roles';
 import type { RubricSuggestion } from '../lib/analysis';
 import { pickShortlist } from '../lib/pipeline';
+import { planImport, type ResultsLink } from '../lib/share';
 import { addCriterion, applyWeightChanges, removeCriterion, setWeight } from '../lib/weights';
 import type {
   Candidate,
@@ -17,8 +18,8 @@ import type {
 } from '../types';
 
 /** Bump both whenever the saved-state shape changes, so old saved state resets cleanly. */
-export const STATE_VERSION = 3;
-export const STORAGE_KEY = 'talent-scout:v3';
+export const STATE_VERSION = 4;
+export const STORAGE_KEY = 'talent-scout:v4';
 
 export interface AppState {
   version: number;
@@ -72,6 +73,8 @@ export type Action =
       at?: string;
     }
   | { type: 'UNDO_REVIEW' }
+  | { type: 'IMPORT_DECISIONS'; results: ResultsLink; at?: string }
+  | { type: 'HYDRATE'; state: AppState }
   | { type: 'SET_REPLIED'; candidateId: string; replied: boolean }
   | { type: 'SET_MUST_HAVE_VALUE'; candidateId: string; mustHaveId: string; value: MustHaveValue }
   | { type: 'LOG_CHAT'; chat: ChatFeedback }
@@ -276,6 +279,19 @@ export function reducer(state: AppState, action: Action): AppState {
         }),
       };
     }
+
+    case 'IMPORT_DECISIONS': {
+      const { apply } = planImport(state.candidates, action.results);
+      let next = state;
+      for (const id of apply) {
+        const d = action.results.decisions[id];
+        next = reducer(next, { type: 'REVIEW_DECISION', candidateId: id, decision: d.decision, reason: d.reason, at: action.at });
+      }
+      return next;
+    }
+
+    case 'HYDRATE':
+      return action.state;
 
     case 'SET_REPLIED':
       return {

@@ -84,8 +84,8 @@ export interface RankedCandidate {
   score: CandidateScore;
   mustHaves: MustHaveResult;
   /**
-   * Ranking score: raw fit blended towards the role average by how much is unknown.
-   * cautious = coverage × fit + (1 − coverage) × roleAverage. Equals fit at full coverage.
+   * Ranking score: raw fit shrunk towards a neutral 50 by how much is unknown.
+   * cautious = coverage × fit + (1 − coverage) × 50. Equals fit at full coverage.
    */
   cautiousFit: number;
   /** Coverage below NEEDS_EVIDENCE_COVERAGE → find out more before contacting. */
@@ -98,15 +98,12 @@ export type SortMode = 'cautious' | 'raw';
 /** Below this coverage (%), a candidate is tagged "Needs more evidence". */
 export const NEEDS_EVIDENCE_COVERAGE = 40;
 
-/** Average raw fit of the role's candidates that have any evidence. */
-export function roleAverageFit(scores: CandidateScore[]): number {
-  const fits = scores.map((s) => s.fit).filter((f): f is number => f !== null);
-  return fits.length ? fits.reduce((a, b) => a + b, 0) / fits.length : 0;
-}
+/** What we assume about the unknown part of a profile: neither good nor bad. */
+export const NEUTRAL_FIT = 50;
 
-export function cautiousFit(score: CandidateScore, roleAverage: number): number {
+export function cautiousFit(score: Pick<CandidateScore, 'fit' | 'coverage'>): number {
   const cov = score.coverage / 100;
-  return cov * (score.fit ?? 0) + (1 - cov) * roleAverage;
+  return cov * (score.fit ?? NEUTRAL_FIT) + (1 - cov) * NEUTRAL_FIT;
 }
 
 /**
@@ -121,13 +118,12 @@ export function rankCandidates(
   const scored = candidates
     .filter((c) => c.roleId === role.id)
     .map((candidate) => ({ candidate, score: scoreCandidate(candidate, role) }));
-  const avg = roleAverageFit(scored.map((x) => x.score));
   return scored
     .map(({ candidate, score }) => ({
       candidate,
       score,
       mustHaves: checkMustHaves(candidate, role),
-      cautiousFit: cautiousFit(score, avg),
+      cautiousFit: cautiousFit(score),
       needsMoreEvidence: score.coverage < NEEDS_EVIDENCE_COVERAGE,
       rank: 0,
     }))

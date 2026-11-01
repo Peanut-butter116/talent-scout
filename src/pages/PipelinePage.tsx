@@ -1,41 +1,28 @@
-import {
-  ArrowRight,
-  CalendarCheck,
-  ClipboardList,
-  Coffee,
-  Handshake,
-  Inbox,
-  Layers,
-  Mail,
-  MessageSquareReply,
-  Sparkles,
-  Star,
-  Undo2,
-  Wand2,
-} from 'lucide-react';
+import { Handshake, Inbox, Layers, MessageSquare, Share2, Star, Undo2, Wand2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState, type DragEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState';
 import { HowItWorksLink } from '../components/HowItWorksLink';
-import { ProfileActions } from '../components/ProfileActions';
+import { InfoTip } from '../components/InfoTip';
 import { OutreachModal } from '../components/OutreachModal';
 import { PageHeader } from '../components/PageHeader';
+import { ProfileLink } from '../components/ProfileActions';
 import { QuickReview } from '../components/QuickReview';
 import { RoleSelector } from '../components/RoleSelector';
+import { ShareDialog } from '../components/ShareDialog';
 import {
   computeKpis,
   hasReplied,
   pickShortlist,
   PIPELINE_COLUMNS,
-  REVIEW_WEEKLY_CAP,
-  reviewDeck,
-  reviewsThisWeek,
   resultsBySource,
+  reviewDeck,
   STATUS_LABEL,
 } from '../lib/pipeline';
 import { rankCandidates, type RankedCandidate } from '../lib/scoring';
 import { useAppState, useSelectedRole } from '../state/AppState';
 import { SKIP_REASONS, type Candidate, type PipelineStatus, type SkipReason } from '../types';
+import { Segmented } from './CandidatesPage';
 
 type Scope = 'role' | 'all';
 
@@ -44,6 +31,7 @@ export function PipelinePage() {
   const role = useSelectedRole();
   const [scope, setScope] = useState<Scope>('role');
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [outreachFor, setOutreachFor] = useState<Candidate | null>(null);
   const [match, setMatch] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -59,7 +47,6 @@ export function PipelinePage() {
   const kpis = useMemo(() => computeKpis(state.candidates), [state.candidates]);
   const sources = useMemo(() => resultsBySource(state.candidates, state.chats), [state.candidates, state.chats]);
   const deck = reviewDeck(state.candidates, state.roles, scopeRoleId, state.reviewLog);
-  const reviewedThisWeek = reviewsThisWeek(state.reviewLog).length;
 
   useEffect(() => {
     if (!match) return;
@@ -88,78 +75,44 @@ export function PipelinePage() {
   const generate = () => {
     const ids = pickShortlist(state.candidates, state.roles, scopeRoleId);
     if (ids.length === 0) {
-      setNotice(
-        scope === 'role'
-          ? `No new candidates left to suggest for ${role.title}. Try “All roles”.`
-          : 'No new candidates left to suggest. Everyone is already in the pipeline.',
-      );
+      setNotice('No new candidates left to suggest.');
       return;
     }
     dispatch({ type: 'GENERATE_SHORTLIST', roleId: scopeRoleId });
-    setNotice(`Added ${ids.length} ${ids.length === 1 ? 'candidate' : 'candidates'} to Suggested — review them below.`);
+    setShareOpen(true);
   };
 
   return (
     <>
-      <PageHeader
-        title="Pipeline"
-        subtitle="Generate this week's shortlist, review it in a couple of minutes, then track outreach and coffee chats."
-        actions={
-          <>
-            <HowItWorksLink />
-            <button className="btn-teal" onClick={generate} data-tour="generate">
-              <Wand2 className="h-4 w-4" /> Generate this week's shortlist
-            </button>
-          </>
-        }
-      />
+      <PageHeader title="Pipeline" subtitle="This week's shortlist, outreach and chats." actions={<HowItWorksLink />} />
       <RoleSelector />
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5" role="radiogroup" aria-label="Scope">
-          {(['role', 'all'] as Scope[]).map((s) => (
-            <button
-              key={s}
-              role="radio"
-              aria-checked={scope === s}
-              onClick={() => setScope(s)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${scope === s ? 'bg-navy-800 text-white' : 'text-navy-700 hover:bg-slate-100'}`}
-            >
-              {s === 'role' ? role.title : 'All roles'}
-            </button>
-          ))}
+      <div className="mb-10 flex flex-wrap items-center gap-2">
+        <button className="btn-primary" onClick={() => setReviewOpen(true)} data-tour="quick-review">
+          <Layers className="h-4 w-4" /> Review shortlist
+          {deck.length > 0 && <span className="rounded-full bg-white/20 px-1.5 text-xs tabular-nums">{deck.length}</span>}
+        </button>
+        <button className="btn-secondary" onClick={generate} data-tour="generate">
+          <Wand2 className="h-4 w-4" /> Generate shortlist
+        </button>
+        <button className="btn-ghost" onClick={() => setShareOpen(true)}>
+          <Share2 className="h-4 w-4" /> Share
+        </button>
+        <div className="sm:ml-auto">
+          <Segmented
+            label="Scope"
+            value={scope}
+            onChange={(v) => setScope(v as Scope)}
+            options={[
+              { value: 'role', label: role.title },
+              { value: 'all', label: 'All roles' },
+            ]}
+          />
         </div>
-        {notice && (
-          <span className="chip bg-teal-50 px-3 py-1 text-sm text-teal-800" role="status">
-            {notice}
-          </span>
-        )}
+        {notice && <p className="w-full text-sm text-ink-500" role="status">{notice}</p>}
       </div>
 
-      <KpiStrip kpis={kpis} />
-
-      <section className="card mb-6 flex flex-col gap-4 bg-gradient-to-r from-navy-900 to-navy-800 p-5 text-white sm:flex-row sm:items-center">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-400/15 text-teal-300">
-          <Layers className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="font-semibold">Review this week's shortlist</h2>
-          <p className="text-sm text-navy-200">
-            {deck.length > 0
-              ? `${deck.length} ${deck.length === 1 ? 'card' : 'cards'} waiting · swipe or tap to approve, skip or star · about 2 minutes`
-              : reviewedThisWeek >= REVIEW_WEEKLY_CAP
-                ? `Weekly cap of ${REVIEW_WEEKLY_CAP} reached — you're done for this week.`
-                : 'Nothing waiting. Generate this week’s shortlist to fill the stack.'}
-          </p>
-        </div>
-        <button
-          className="btn bg-teal-400 text-navy-950 hover:bg-teal-300"
-          onClick={() => setReviewOpen(true)}
-          data-tour="quick-review"
-        >
-          {deck.length > 0 ? 'Start quick review' : 'Open summary'} <ArrowRight className="h-4 w-4" />
-        </button>
-      </section>
+      <Kpis kpis={kpis} />
 
       <Board
         ranked={ranked}
@@ -170,20 +123,19 @@ export function PipelinePage() {
         hasFeedback={(id) => state.chats.some((c) => c.candidateId === id)}
       />
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-5">
         <SourceTable rows={sources} />
         <WeeklyRhythm />
       </div>
 
       {reviewOpen && <QuickReview roleId={scopeRoleId} onClose={() => setReviewOpen(false)} />}
+      {shareOpen && <ShareDialog roleId={scopeRoleId} onClose={() => setShareOpen(false)} />}
       {outreachFor && (
         <OutreachModal
           candidate={outreachFor}
           role={state.roles.find((r) => r.id === outreachFor.roleId)!}
           onClose={() => setOutreachFor(null)}
-          onMarkContacted={
-            outreachFor.status === 'approved' ? () => moveTo(outreachFor, 'contacted') : undefined
-          }
+          onMarkContacted={outreachFor.status === 'approved' ? () => moveTo(outreachFor, 'contacted') : undefined}
         />
       )}
       {match && <MatchMoment name={match} />}
@@ -191,43 +143,32 @@ export function PipelinePage() {
   );
 }
 
-function KpiStrip({ kpis }: { kpis: ReturnType<typeof computeKpis> }) {
+function Kpis({ kpis }: { kpis: ReturnType<typeof computeKpis> }) {
   const tiles = [
-    { label: 'Shortlisted this week', value: kpis.shortlistedThisWeek, icon: ClipboardList },
-    { label: 'Contacted', value: kpis.contacted, icon: Mail },
+    { label: 'Shortlisted this week', value: kpis.shortlistedThisWeek },
+    { label: 'Contacted', value: kpis.contacted },
     {
       label: 'Reply rate',
       value: kpis.replyRate === null ? '—' : `${Math.round(kpis.replyRate * 100)}%`,
       sub: `(${kpis.replied} of ${kpis.contacted})`,
-      icon: MessageSquareReply,
     },
-    { label: 'Chats booked', value: kpis.chatsBooked, icon: CalendarCheck },
-    { label: 'Chats done', value: kpis.chatsDone, icon: Coffee },
+    { label: 'Chats booked', value: kpis.chatsBooked },
+    { label: 'Chats done', value: kpis.chatsDone },
   ];
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <dl className="mb-12 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
       {tiles.map((t) => (
-        <div key={t.label} className="card p-4">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-            <t.icon className="h-3.5 w-3.5" aria-hidden /> {t.label}
-          </div>
-          <div className="mt-1 text-2xl font-semibold tabular-nums text-navy-900">{t.value}</div>
-          {t.sub && <div className="text-xs text-slate-400">{t.sub}</div>}
+        <div key={t.label}>
+          <dt className="text-xs text-ink-400">{t.label}</dt>
+          <dd className="mt-1 text-3xl font-semibold tabular-nums text-ink-900">
+            {t.value}
+            {t.sub && <span className="ml-1.5 text-xs font-normal text-ink-400">{t.sub}</span>}
+          </dd>
         </div>
       ))}
-    </div>
+    </dl>
   );
 }
-
-const COLUMN_EMPTY: Record<PipelineStatus, string> = {
-  new: '',
-  suggested: 'Generate this week’s shortlist to fill this column.',
-  approved: 'Approve candidates in Quick review.',
-  contacted: 'Draft outreach for approved candidates.',
-  booked: 'Mark replies, then book a chat.',
-  done: 'Completed chats land here.',
-  skipped: 'Nobody skipped. Nice.',
-};
 
 function Board({
   ranked,
@@ -250,11 +191,7 @@ function Board({
   const inPipeline = ranked.filter((r) => r.candidate.status !== 'new');
 
   if (inPipeline.length === 0) {
-    return (
-      <EmptyState icon={Inbox} title="Nobody in the pipeline yet">
-        Click “Generate this week's shortlist” to suggest the top candidates, or add people from the Candidates page.
-      </EmptyState>
-    );
+    return <EmptyState icon={Inbox} title="Nobody in the pipeline yet." />;
   }
 
   const onDrop = (e: DragEvent, status: PipelineStatus) => {
@@ -267,12 +204,16 @@ function Board({
 
   return (
     <section aria-label="Pipeline board">
-      <div className="relative -mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-        <div className="flex min-w-max items-start gap-3">
+      <div className="relative pb-2 md:overflow-x-auto">
+        <div className="flex flex-col gap-3 md:min-w-max md:flex-row md:items-start md:gap-4">
           {PIPELINE_COLUMNS.map((col) => {
             const items = ranked
               .filter((r) => r.candidate.status === col.status)
-              .sort((a, b) => Number(Boolean(b.candidate.priority)) - Number(Boolean(a.candidate.priority)) || (b.score.fit ?? 0) - (a.score.fit ?? 0));
+              .sort(
+                (a, b) =>
+                  Number(Boolean(b.candidate.priority)) - Number(Boolean(a.candidate.priority)) ||
+                  b.cautiousFit - a.cautiousFit,
+              );
             return (
               <div
                 key={col.status}
@@ -282,17 +223,15 @@ function Board({
                 }}
                 onDragLeave={() => setDragOver(null)}
                 onDrop={(e) => onDrop(e, col.status)}
-                className={`flex w-64 flex-col rounded-xl border p-2.5 transition-colors ${
-                  dragOver === col.status ? 'border-teal-400 bg-teal-50/60' : col.status === 'skipped' ? 'border-slate-200 bg-slate-100/60' : 'border-slate-200 bg-slate-100'
-                }`}
+                className={`flex w-full flex-col rounded-2xl p-2 transition-colors md:w-64 ${dragOver === col.status ? 'bg-teal-50' : 'bg-ink-50'}`}
                 data-tour={`col-${col.status}`}
               >
-                <div className="mb-2 flex items-center justify-between px-1">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-600">{col.label}</h3>
-                  <span className="chip bg-white tabular-nums text-slate-600">{items.length}</span>
+                <div className={`flex items-center justify-between px-2 pt-1 ${items.length ? 'mb-2' : 'pb-1 md:mb-2 md:pb-0'}`}>
+                  <h3 className="text-sm font-medium text-ink-700">{col.label}</h3>
+                  <span className="text-xs tabular-nums text-ink-400">{items.length}</span>
                 </div>
                 <div className="flex max-h-[34rem] flex-col gap-2 overflow-y-auto">
-                  {items.length === 0 && <p className="px-1 py-3 text-xs text-slate-400">{COLUMN_EMPTY[col.status]}</p>}
+                  {items.length === 0 && <p className="hidden px-2 py-3 text-xs text-ink-300 md:block">Empty</p>}
                   {items.map((r) => (
                     <BoardCard
                       key={r.candidate.id}
@@ -310,9 +249,6 @@ function Board({
           })}
         </div>
       </div>
-      <p className="mt-2 text-xs text-slate-500">
-        Use the buttons on each card, the “Move to” menu, or drag cards between columns on desktop.
-      </p>
     </section>
   );
 }
@@ -334,53 +270,67 @@ function BoardCard({
 }) {
   const c = item.candidate;
   const [skipping, setSkipping] = useState(false);
-  const fit = item.score.fit === null ? '—' : `${Math.round(item.score.fit)}%`;
+  const fit = item.score.fit === null ? '—' : `${Math.round(item.cautiousFit)}%`;
 
   return (
     <article
       draggable
       onDragStart={(e) => e.dataTransfer.setData('text/plain', c.id)}
-      className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+      className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-ink-100"
       data-testid={`card-${c.id}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          {roleTitle && <div className="truncate text-[10px] font-medium uppercase tracking-wider text-teal-700">{roleTitle}</div>}
+          {roleTitle && <div className="truncate text-[11px] text-teal-700">{roleTitle}</div>}
           <div className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-semibold text-navy-900">{c.name}</span>
-            {c.priority && <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" aria-label="Priority" />}
+            <span className="truncate text-sm font-medium text-ink-900">{c.name}</span>
+            {c.priority && (
+              <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-amber-50 px-1.5 text-[11px] font-medium text-amber-700" title="CEO wants to meet personally">
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-hidden />
+                <span className="sr-only">Priority</span>
+              </span>
+            )}
           </div>
-          <div className="truncate text-xs text-slate-500">{c.headline}</div>
+          <div className="truncate text-xs text-ink-400">{c.headline}</div>
         </div>
-        <span className="shrink-0 text-sm font-semibold tabular-nums text-navy-900">{fit}</span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="text-sm font-semibold tabular-nums text-ink-900">{fit}</span>
+          <div className="flex items-center gap-0.5">
+            <ProfileLink candidate={c} iconOnly className="rounded-full p-1 text-ink-300 hover:text-teal-700" />
+            <button
+              className="rounded-full p-1 text-ink-300 hover:text-teal-700"
+              onClick={() => onDraft(c)}
+              aria-label={`Contact ${c.name}`}
+              title="Contact"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-1.5 flex flex-wrap gap-1">
-        {c.priority && <span className="chip bg-amber-50 text-amber-700">CEO wants to meet</span>}
-        {c.status === 'contacted' && c.replied && <span className="chip bg-teal-50 text-teal-700">Replied</span>}
+      <div className="mt-1.5 flex flex-wrap gap-1 empty:hidden">
+        {c.status === 'contacted' && c.replied && <span className="chip bg-teal-50 text-teal-800">Replied</span>}
         {c.status === 'skipped' && c.skipReason && (
-          <span className="chip bg-slate-200 text-slate-600">{SKIP_REASONS.find((r) => r.id === c.skipReason)?.label}</span>
+          <span className="chip bg-ink-100 text-ink-500">{SKIP_REASONS.find((r) => r.id === c.skipReason)?.label}</span>
+        )}
+        {item.needsMoreEvidence && ['suggested', 'approved'].includes(c.status) && (
+          <span className="chip bg-amber-50 text-amber-700">Needs evidence</span>
         )}
       </div>
 
-      {item.needsMoreEvidence && ['suggested', 'approved'].includes(c.status) && (
-        <p className="mt-1.5 text-xs text-amber-700">Needs more evidence — find out more before contacting.</p>
-      )}
-
       {c.status === 'done' && (
-        <div className="mt-2 rounded-md bg-slate-50 px-2 py-1.5 text-xs text-slate-600">
-          <span className="font-medium">Next step:</span> hand to formal pipeline (Ashby — not connected in demo)
-        </div>
+        <p className="mt-2 text-xs text-ink-500">Next step: hand to formal pipeline (Ashby — not connected in demo)</p>
       )}
 
       {skipping ? (
         <div className="mt-2">
-          <p className="mb-1 text-xs font-medium text-slate-600">Why skip?</p>
+          <p className="mb-1 text-xs text-ink-500">Why skip?</p>
           <div className="flex flex-wrap gap-1">
             {SKIP_REASONS.map((r) => (
               <button
                 key={r.id}
-                className="chip border border-slate-300 bg-white text-slate-700 hover:border-navy-400"
+                className="chip bg-ink-100 text-ink-700 hover:bg-ink-200"
                 onClick={() => {
                   onMove(c, 'skipped', r.id);
                   setSkipping(false);
@@ -389,13 +339,13 @@ function BoardCard({
                 {r.label}
               </button>
             ))}
-            <button className="chip text-slate-400 hover:text-slate-600" onClick={() => setSkipping(false)}>
+            <button className="chip text-ink-400 hover:text-ink-700" onClick={() => setSkipping(false)}>
               Cancel
             </button>
           </div>
         </div>
       ) : (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
           {c.status === 'suggested' && (
             <>
               <CardBtn primary onClick={() => onMove(c, 'approved')}>Approve</CardBtn>
@@ -405,23 +355,22 @@ function BoardCard({
           {c.status === 'approved' && (
             <>
               <CardBtn primary onClick={() => onDraft(c)}>Draft outreach</CardBtn>
-              <CardBtn onClick={() => onMove(c, 'contacted')}>Mark contacted</CardBtn>
+              <CardBtn onClick={() => onMove(c, 'contacted')}>Contacted</CardBtn>
             </>
           )}
           {c.status === 'contacted' && (
             <>
-              {!c.replied && <CardBtn onClick={() => onReplied(c)}>Mark replied</CardBtn>}
+              {!c.replied && <CardBtn onClick={() => onReplied(c)}>Replied</CardBtn>}
               <CardBtn primary onClick={() => onMove(c, 'booked')}>Chat booked</CardBtn>
-              <CardBtn onClick={() => onDraft(c)}>Draft</CardBtn>
             </>
           )}
           {c.status === 'booked' && <CardBtn primary onClick={() => onMove(c, 'done')}>Chat done</CardBtn>}
           {c.status === 'done' &&
             (feedbackLogged ? (
-              <span className="chip bg-emerald-50 text-emerald-700">Feedback logged</span>
+              <span className="text-xs text-teal-700">Feedback logged</span>
             ) : (
-              <Link to={`/learning?log=${c.id}`} className="btn-teal px-2.5 py-1 text-xs" data-tour="log-feedback">
-                Log chat feedback
+              <Link to={`/learning?log=${c.id}`} className="rounded-full bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800" data-tour="log-feedback">
+                Log feedback
               </Link>
             ))}
           {c.status === 'skipped' && (
@@ -429,13 +378,10 @@ function BoardCard({
               <Undo2 className="h-3 w-3" /> Restore
             </CardBtn>
           )}
-          <div className="w-full">
-            <ProfileActions candidate={c} onContact={() => onDraft(c)} size="sm" />
-          </div>
           <label className="ml-auto">
             <span className="sr-only">Move {c.name} to</span>
             <select
-              className="rounded-md border border-slate-200 bg-white py-1 pl-1.5 pr-6 text-xs text-slate-600"
+              className="rounded-full border-0 bg-transparent py-0.5 pl-1.5 pr-6 text-xs text-ink-400 hover:text-ink-700 focus:ring-1 focus:ring-ink-200"
               value=""
               onChange={(e) => {
                 const s = e.target.value as PipelineStatus;
@@ -443,7 +389,7 @@ function BoardCard({
                 else if (s) onMove(c, s);
               }}
             >
-              <option value="">Move to…</option>
+              <option value="">Move</option>
               {PIPELINE_COLUMNS.filter((col) => col.status !== c.status).map((col) => (
                 <option key={col.status} value={col.status}>{col.label}</option>
               ))}
@@ -460,8 +406,8 @@ function CardBtn({ children, onClick, primary }: { children: React.ReactNode; on
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium ${
-        primary ? 'bg-navy-800 text-white hover:bg-navy-700' : 'border border-slate-300 bg-white text-navy-700 hover:bg-slate-50'
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+        primary ? 'bg-ink-900 text-white hover:bg-ink-700' : 'text-ink-700 ring-1 ring-ink-200 hover:bg-ink-50'
       }`}
     >
       {children}
@@ -470,16 +416,20 @@ function CardBtn({ children, onClick, primary }: { children: React.ReactNode; on
 }
 
 function SourceTable({ rows }: { rows: ReturnType<typeof resultsBySource> }) {
-  const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '—');
-  const withN = (a: number, b: number) => (b ? `${pct(a, b)} (${a} of ${b})` : '—');
+  const withN = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}% (${a} of ${b})` : '—');
   return (
-    <section className="card min-w-0 p-5 lg:col-span-3" aria-labelledby="sources-h">
-      <h2 id="sources-h" className="font-semibold text-navy-900">Results by source</h2>
-      <p className="mt-0.5 text-sm text-slate-500">Is direct sourcing beating agencies? Counted across all roles.</p>
+    <section className="min-w-0 lg:col-span-3" aria-labelledby="sources-h">
+      <h2 id="sources-h" className="flex items-center gap-1.5 text-lg font-semibold text-ink-900">
+        Results by source
+        <InfoTip label="About results by source">
+          Percentages are of people contacted. “Progressed” means the chat was marked Progress. Direct = LinkedIn
+          outreach or referrals.
+        </InfoTip>
+      </h2>
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[520px] text-sm">
-          <thead className="text-left text-xs uppercase tracking-wider text-slate-500">
-            <tr className="border-b border-slate-200">
+        <table className="w-full min-w-[480px] text-sm">
+          <thead className="text-left text-xs text-ink-400">
+            <tr className="border-b border-ink-100">
               <th className="py-2 pr-3 font-medium">Source</th>
               <th className="py-2 pr-3 text-right font-medium">Contacted</th>
               <th className="py-2 pr-3 text-right font-medium">Replied</th>
@@ -487,54 +437,47 @@ function SourceTable({ rows }: { rows: ReturnType<typeof resultsBySource> }) {
               <th className="py-2 text-right font-medium">Progressed</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink-100">
             {rows.map((r) => (
               <tr key={r.source}>
-                <td className="py-2.5 pr-3 font-medium text-navy-900">
+                <td className="py-3 pr-3 text-ink-900">
                   {r.source}
                   {(r.source === 'LinkedIn direct' || r.source === 'Network referral') && (
-                    <span className="chip ml-2 bg-teal-50 text-teal-700">Direct</span>
+                    <span className="ml-2 text-xs text-teal-700">Direct</span>
                   )}
                 </td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">{r.contacted}</td>
-                <td className="py-2.5 pr-3 text-right tabular-nums whitespace-nowrap">{withN(r.replied, r.contacted)}</td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">{r.chats}</td>
-                <td className="py-2.5 text-right font-semibold tabular-nums whitespace-nowrap text-navy-900">{withN(r.progressed, r.contacted)}</td>
+                <td className="py-3 pr-3 text-right tabular-nums text-ink-600">{r.contacted}</td>
+                <td className="whitespace-nowrap py-3 pr-3 text-right tabular-nums text-ink-600">{withN(r.replied, r.contacted)}</td>
+                <td className="py-3 pr-3 text-right tabular-nums text-ink-600">{r.chats}</td>
+                <td className="whitespace-nowrap py-3 text-right font-medium tabular-nums text-ink-900">{withN(r.progressed, r.contacted)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-xs text-slate-500">
-        Demo data. Small samples — indicative only. Percentages are of people contacted; “Progressed” = chat marked Progress.
-      </p>
+      <p className="mt-3 text-xs text-ink-400">Demo data. Small samples — indicative only.</p>
     </section>
   );
 }
 
 function WeeklyRhythm() {
   const steps = [
-    { day: 'Mon', who: 'EA', text: 'Sources & scores candidates', icon: Sparkles },
-    { day: 'Tue', who: 'CEO', text: 'Approves the shortlist (~10 min)', icon: Layers },
-    { day: 'Wed–Thu', who: 'EA', text: 'Handles outreach & booking', icon: Handshake },
-    { day: 'Fri', who: 'CEO', text: 'Logs chat feedback (~30 sec each) — the rubric updates', icon: Coffee },
+    { day: 'Mon', who: 'EA', text: 'Sources & scores' },
+    { day: 'Tue', who: 'CEO', text: 'Approves shortlist (~10 min)' },
+    { day: 'Wed–Thu', who: 'EA', text: 'Outreach & booking' },
+    { day: 'Fri', who: 'CEO', text: 'Logs chat feedback (~30 sec each) — rubric updates' },
   ];
   return (
-    <section className="card min-w-0 p-5 lg:col-span-2" aria-labelledby="rhythm-h">
-      <h2 id="rhythm-h" className="font-semibold text-navy-900">Weekly rhythm</h2>
-      <p className="mt-0.5 text-sm text-slate-500">About 20 minutes of CEO time a week.</p>
+    <section className="min-w-0 lg:col-span-2" aria-labelledby="rhythm-h">
+      <h2 id="rhythm-h" className="text-lg font-semibold text-ink-900">Weekly rhythm</h2>
       <ol className="mt-4 space-y-3">
         {steps.map((s) => (
-          <li key={s.day} className="flex gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
-              <s.icon className="h-4 w-4" aria-hidden />
-            </div>
-            <div className="text-sm">
-              <div className="font-medium text-navy-900">
-                {s.day} <span className={`chip ml-1 ${s.who === 'CEO' ? 'bg-navy-800 text-white' : 'bg-slate-100 text-slate-600'}`}>{s.who}</span>
-              </div>
-              <div className="text-slate-600">{s.text}</div>
-            </div>
+          <li key={s.day} className="flex gap-3 text-sm">
+            <span className="w-16 shrink-0 font-medium text-ink-900">{s.day}</span>
+            <span className="text-ink-500">
+              <span className={`mr-1.5 text-xs font-medium ${s.who === 'CEO' ? 'text-teal-700' : 'text-ink-400'}`}>{s.who}</span>
+              {s.text}
+            </span>
           </li>
         ))}
       </ol>
@@ -545,13 +488,13 @@ function WeeklyRhythm() {
 function MatchMoment({ name }: { name: string }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4" role="status" aria-live="polite">
-      <div className="animate-match flex items-center gap-3 rounded-2xl bg-navy-900 px-5 py-3.5 text-white shadow-2xl">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-400 text-navy-950">
-          <Handshake className="h-5 w-5" />
+      <div className="animate-match flex items-center gap-3 rounded-full bg-ink-900 py-2.5 pl-2.5 pr-5 text-white shadow-2xl">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-500 text-ink-950">
+          <Handshake className="h-4 w-4" />
         </div>
-        <div>
-          <div className="font-semibold">It's a match</div>
-          <div className="text-sm text-navy-200">{name} is up for a coffee chat.</div>
+        <div className="text-sm">
+          <span className="font-semibold">It's a match</span>
+          <span className="text-ink-300"> · {name} is up for a chat</span>
         </div>
       </div>
     </div>

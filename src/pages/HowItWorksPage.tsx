@@ -2,29 +2,27 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ExternalLink, Minus, RotateC
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { HypothesisChip, StrengthChip } from '../components/Chips';
-import { DemoBadge } from '../components/DemoBadge';
 import {
   HIGH_PREDICTED_THRESHOLD,
   HOLDING_UP_DIFF,
   MIN_GROUP_SIZE,
   MIN_SUGGESTED_WEIGHT,
-  OVERSTATED_GAP,
 } from '../lib/analysis';
-import { NEEDS_EVIDENCE_COVERAGE, rankCandidates, roleAverageFit } from '../lib/scoring';
+import { NEEDS_EVIDENCE_COVERAGE, NEUTRAL_FIT, rankCandidates } from '../lib/scoring';
 import { setWeight } from '../lib/weights';
 import { useAppState } from '../state/AppState';
 import type { Criterion } from '../types';
 
 const SECTIONS = [
   { id: 'big-idea', title: 'The big idea' },
-  { id: 'evidence', title: 'Evidence ratings' },
-  { id: 'fit', title: 'Fit score' },
-  { id: 'cautious', title: 'Cautious fit (the ranking)' },
+  { id: 'evidence', title: 'Evidence' },
+  { id: 'fit', title: 'Fit' },
+  { id: 'cautious', title: 'Ranking' },
   { id: 'confidence', title: 'Confidence' },
-  { id: 'example', title: 'How weights affect ranking — live' },
-  { id: 'learning', title: 'Learning from coffee chats' },
-  { id: 'matching', title: 'Evidence matching model' },
-  { id: 'limits', title: 'Limits and human oversight' },
+  { id: 'example', title: 'Try it' },
+  { id: 'learning', title: 'Learning' },
+  { id: 'matching', title: 'Matching model' },
+  { id: 'limits', title: 'Limits' },
   { id: 'sources', title: 'Sources' },
 ];
 
@@ -40,148 +38,82 @@ export function HowItWorksPage() {
   const from = (location.state as { from?: string } | null)?.from;
 
   return (
-    <article className="mx-auto max-w-3xl">
-      <Link to={from ?? '/roles'} className="btn-ghost -ml-3 mb-4 text-sm">
-        <ArrowLeft className="h-4 w-4" /> {from ? 'Back' : 'Back to the app'}
+    <article className="mx-auto max-w-2xl">
+      <Link to={from ?? '/roles'} className="btn-ghost -ml-4 mb-6 text-sm">
+        <ArrowLeft className="h-4 w-4" /> Back
       </Link>
-      <DemoBadge className="mb-2" />
-      <h1 className="text-2xl font-semibold tracking-tight text-navy-900 sm:text-3xl">How ranking works</h1>
-      <p className="mt-2 text-slate-600">
-        Plain-English notes on every number in Talent Scout. Nothing here is a black box: it's a handful of simple rules,
-        and a human makes every decision.
-      </p>
+      <h1 className="text-3xl font-semibold text-ink-900 sm:text-4xl">How it works</h1>
+      <p className="mt-2 text-[15px] text-ink-500">A few simple rules. A person makes every decision.</p>
 
-      <nav className="card mt-6 p-4" aria-label="On this page">
-        <ol className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
-          {SECTIONS.map((s, i) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`} className="text-navy-700 hover:text-teal-700">
-                <span className="mr-1.5 tabular-nums text-slate-400">{i + 1}.</span>
-                {s.title}
-              </a>
-            </li>
-          ))}
-        </ol>
+      <nav className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-sm" aria-label="On this page">
+        {SECTIONS.map((s) => (
+          <a key={s.id} href={`#${s.id}`} className="text-ink-500 hover:text-ink-900">
+            {s.title}
+          </a>
+        ))}
       </nav>
 
       <Section n={1} id="big-idea" title="The big idea">
-        <p>
-          Every hiring criterion is a <strong>hypothesis</strong>: “people with this background turn out to be strong hires”.
-          We score candidates against weighted criteria, meet the best in coffee chats, and record what we saw. Over time the
-          chats show which hypotheses hold up, and the weights shift towards what actually predicts a good hire.
-        </p>
+        <p>Every criterion is a hypothesis. Coffee chats test it. The rubric updates.</p>
         <LoopDiagram />
       </Section>
 
-      <Section n={2} id="evidence" title="Evidence ratings">
-        <p>For each criterion, a candidate has either:</p>
-        <ul className="mt-2 space-y-1.5">
-          <li className="flex flex-wrap items-center gap-2">
-            <StrengthChip strength="strong" /> a 0–5 rating backed by something concrete (a shipped product, a number, a link).
-          </li>
-          <li className="flex flex-wrap items-center gap-2">
-            <StrengthChip strength="weak" /> a 0–5 rating based on a claim or second-hand signal.
-          </li>
-          <li className="flex flex-wrap items-center gap-2">
-            <StrengthChip strength="missing" /> nothing yet — we simply don't know.
-          </li>
-        </ul>
-        <p className="mt-3">
-          Where ratings come from: in this demo they were entered by a person. On the Sourcing page, an on-device matching
-          model will <em>suggest</em> evidence from text you paste — and a person always confirms or edits it before it counts.
-        </p>
+      <Section n={2} id="evidence" title="Evidence">
+        <p>Each criterion gets a 0–5 rating, or nothing yet.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <StrengthChip strength="strong" />
+          <StrengthChip strength="weak" />
+          <StrengthChip strength="missing" />
+        </div>
+        <p className="mt-3">Entered by a person. In Sourcing, a matching model suggests — a person confirms.</p>
       </Section>
 
-      <Section n={3} id="fit" title="Fit score">
-        <p>A weighted average of the ratings we have, shown as 0–100%:</p>
-        <Formula>fit = Σ (weight × rating) ÷ (5 × Σ weight of evidenced criteria)</Formula>
-        <p>
-          Weights are <strong>re-normalised</strong> over the criteria that have evidence. So a missing criterion is left
-          out — it is never treated as a zero. That's deliberate: “we haven't checked” is not the same as “they can't”. Missing
-          evidence lowers <em>confidence</em> and <em>coverage</em> instead.
-        </p>
+      <Section n={3} id="fit" title="Fit">
+        <Formula>fit = Σ (weight × rating) ÷ (5 × Σ weight with evidence)</Formula>
+        <p>Missing ratings are left out, never counted as zero. “Not checked” isn't “can't”.</p>
       </Section>
 
-      <Section n={4} id="cautious" title="Cautious fit (the ranking)">
+      <Section n={4} id="cautious" title="Ranking (cautious fit)">
+        <Formula>cautious = coverage × fit + (1 − coverage) × {NEUTRAL_FIT}</Formula>
         <p>
-          Fit alone lets a thin profile with two great ratings sit at the top of the list. So we rank by <strong>cautious
-          fit</strong>, which pulls a score towards the role's average in proportion to how much is unknown:
-        </p>
-        <Formula>cautious fit = coverage × fit + (1 − coverage) × role average fit</Formula>
-        <p>
-          <em>Coverage</em> is the share of total weight that has evidence. With full evidence, cautious fit equals fit. With
-          little evidence, it sits near the average until we learn more. Below {NEEDS_EVIDENCE_COVERAGE}% coverage, a
-          candidate is tagged <strong>“Needs more evidence”</strong> with the suggestion to find out more before contacting.
-          You can switch the Candidates table to “Raw fit” at any time.
+          Unknowns count as neutral, so thin profiles can't top the list. Under {NEEDS_EVIDENCE_COVERAGE}% coverage:
+          “Needs more evidence”.
         </p>
       </Section>
 
       <Section n={5} id="confidence" title="Confidence">
-        <p>How much to trust the score, not how good the candidate is.</p>
-        <ul className="mt-2 list-disc space-y-1 pl-5">
-          <li><strong>High</strong> — at least 80% of the weight evidenced, and at least 60% of that by strong evidence.</li>
-          <li><strong>Low</strong> — under 50% evidenced, or less than 30% strong.</li>
-          <li><strong>Medium</strong> — everything in between.</li>
-        </ul>
-        <p className="mt-3 text-sm text-slate-500">
-          Coming in the Sourcing step: confidence becomes a single transparent formula — coverage × quality (strong vs weak)
-          × verification (confirmed by a person, then by a coffee chat) — giving a 0–100 score and the same three labels.
-        </p>
+        <p>How much to trust the score — not how good the person is.</p>
+        <p className="mt-2 text-ink-500">High: ≥ 80% evidenced, mostly strong. Low: under half, or mostly weak.</p>
       </Section>
 
-      <Section n={6} id="example" title="How weights affect ranking — live">
+      <Section n={6} id="example" title="Try it">
         <LiveExample />
       </Section>
 
-      <Section n={7} id="learning" title="Learning from coffee chats">
+      <Section n={7} id="learning" title="Learning">
         <p>
-          After each chat, the CEO logs an outcome — Progress (1), Maybe (0.5) or Not a fit (0) — and optionally what they
-          observed per criterion. For each criterion we then compare candidates whose profiles rated them high (≥{' '}
-          {HIGH_PREDICTED_THRESHOLD}) with those rated lower:
+          Outcomes: Progress 1 · Maybe 0.5 · Not a fit 0. Compare people rated high (≥ {HIGH_PREDICTED_THRESHOLD}) with
+          the rest.
         </p>
         <ul className="mt-3 space-y-2">
-          <li className="flex flex-wrap items-center gap-2">
-            <HypothesisChip label="Not tested yet" /> fewer than 2 chats with a profile rating for it.
-          </li>
-          <li className="flex flex-wrap items-center gap-2">
-            <HypothesisChip label="Holding up" /> high-rated candidates did at least {Math.round(HOLDING_UP_DIFF * 100)} points better.
-          </li>
-          <li className="flex flex-wrap items-center gap-2">
-            <HypothesisChip label="Not supported" /> high-rated candidates did no better (or worse).
-          </li>
-          <li className="flex flex-wrap items-center gap-2">
-            <HypothesisChip label="Unclear" /> a small or mixed difference, or fewer than {MIN_GROUP_SIZE} chats on either side.
-          </li>
+          <li className="flex flex-wrap items-center gap-2"><HypothesisChip label="Holding up" /> high did {Math.round(HOLDING_UP_DIFF * 100)}+ points better</li>
+          <li className="flex flex-wrap items-center gap-2"><HypothesisChip label="Not supported" /> high did no better</li>
+          <li className="flex flex-wrap items-center gap-2"><HypothesisChip label="Unclear" /> small gap, or under {MIN_GROUP_SIZE} chats a side</li>
+          <li className="flex flex-wrap items-center gap-2"><HypothesisChip label="Not tested yet" /> under 2 chats</li>
         </ul>
-        <p className="mt-3">
-          Qualities every role shares (Builder, Sharp & curious, Low ego) and pedigree-style criteria are pooled across roles,
-          so they get tested sooner. If profiles rated a criterion {OVERSTATED_GAP}+ points higher than chats did, on average,
-          it's flagged as “profiles overstated”.
-        </p>
-        <p className="mt-3">
-          <strong>Suggested weight change:</strong> take weight from the least-supported criterion (halved, never below{' '}
-          {MIN_SUGGESTED_WEIGHT}) and give it to the best-supported one. A person accepts or dismisses it; accepted changes are
-          logged in Weight history.
-        </p>
+        <p className="mt-3">Suggestion: halve the weakest (min {MIN_SUGGESTED_WEIGHT}), give it to the strongest. You decide.</p>
       </Section>
 
-      <Section n={8} id="matching" title="Evidence matching model">
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">
-          <p className="font-medium text-navy-800">Coming in the Sourcing step</p>
-          <p className="mt-1">
-            This section will explain how pasted profile text is matched to criteria on your device, and what the match
-            scores mean.
-          </p>
-        </div>
+      <Section n={8} id="matching" title="Matching model">
+        <p className="text-ink-400">Coming in the Sourcing step.</p>
       </Section>
 
-      <Section n={9} id="limits" title="Limits and human oversight">
-        <ul className="list-disc space-y-1.5 pl-5">
-          <li>Scores support a human decision; they never make it. Nobody is contacted or rejected automatically.</li>
-          <li>Text similarity measures relevance, not ability. A well-written profile is not a better engineer.</li>
-          <li>Samples are small. Learning results are indicative only, and a person decides what to change.</li>
-          <li>No protected characteristics are stored or used — no photos, ages, gender or nationality.</li>
-          <li>All candidates and activity in this demo are fictional.</li>
+      <Section n={9} id="limits" title="Limits">
+        <ul className="space-y-1.5">
+          <li>Scores support a decision; they never make it.</li>
+          <li>Similarity measures relevance, not ability.</li>
+          <li>Small samples — a guide, not proof.</li>
+          <li>No protected characteristics are used.</li>
         </ul>
       </Section>
 
@@ -202,9 +134,9 @@ export function HowItWorksPage() {
 
 function Section({ n, id, title, children }: { n: number; id: string; title: string; children: ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-20 border-t border-slate-200 pt-8 mt-8 text-[15px] leading-relaxed text-slate-700">
-      <h2 className="mb-3 text-lg font-semibold text-navy-900">
-        <span className="mr-2 text-slate-400">{n}.</span>
+    <section id={id} className="mt-14 scroll-mt-24 text-[15px] leading-relaxed text-ink-700">
+      <h2 className="mb-3 text-xl font-semibold text-ink-900">
+        <span className="mr-2 text-ink-300">{n}</span>
         {title}
       </h2>
       {children}
@@ -213,34 +145,28 @@ function Section({ n, id, title, children }: { n: number; id: string; title: str
 }
 
 function Formula({ children }: { children: ReactNode }) {
-  return (
-    <div className="my-3 overflow-x-auto rounded-lg bg-navy-900 px-4 py-3 font-mono text-[13px] text-teal-100">
-      {children}
-    </div>
-  );
+  return <div className="my-3 overflow-x-auto rounded-2xl bg-ink-50 px-4 py-3 font-mono text-[13px] text-ink-800">{children}</div>;
 }
 
 function LoopDiagram() {
-  const steps = ['Criteria = hypotheses', 'Score & rank', 'Weekly shortlist', 'Coffee chats', 'Feedback & learning'];
+  const steps = ['Criteria', 'Rank', 'Shortlist', 'Coffee chats', 'Learn'];
   return (
-    <figure className="mt-4 rounded-xl border border-slate-200 bg-white p-4" aria-label="The weekly learning loop">
-      <ol className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-1">
+    <figure className="mt-5" aria-label="The weekly learning loop">
+      <ol className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
         {steps.map((s, i) => (
-          <li key={s} className="flex flex-col items-center gap-2 sm:flex-1 sm:flex-row sm:gap-1">
-            <div className="w-full rounded-lg bg-teal-50 px-3 py-2 text-center text-sm font-medium text-teal-900 ring-1 ring-teal-100">
-              {s}
-            </div>
+          <li key={s} className="flex flex-col items-center gap-1.5 sm:flex-row sm:gap-2">
+            <span className="rounded-full bg-ink-50 px-4 py-2 text-sm font-medium text-ink-800">{s}</span>
             {i < steps.length - 1 && (
               <>
-                <ArrowDown className="h-4 w-4 shrink-0 text-slate-400 sm:hidden" aria-hidden />
-                <ArrowRight className="hidden h-4 w-4 shrink-0 text-slate-400 sm:block" aria-hidden />
+                <ArrowDown className="h-4 w-4 text-ink-300 sm:hidden" aria-hidden />
+                <ArrowRight className="hidden h-4 w-4 text-ink-300 sm:block" aria-hidden />
               </>
             )}
           </li>
         ))}
       </ol>
-      <figcaption className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-500">
-        <RotateCcw className="h-3.5 w-3.5" aria-hidden /> Feedback updates the weights, and the loop runs again next week.
+      <figcaption className="mt-3 flex items-center justify-center gap-1.5 text-xs text-ink-400 sm:justify-start">
+        <RotateCcw className="h-3.5 w-3.5" aria-hidden /> Weights update, repeat weekly.
       </figcaption>
     </figure>
   );
@@ -268,66 +194,55 @@ function LiveExample() {
   const ranked = useMemo(() => rankCandidates(state.candidates, role), [state.candidates, role]);
   const item = ranked.find((r) => r.candidate.id === candidateId);
   const before = baseRanked.find((r) => r.candidate.id === candidateId);
-  const avg = roleAverageFit(ranked.map((r) => r.score));
   const slider = criteria.find((c) => c.id === sliderId);
   const changed = criteria.some((c, i) => c.weight !== baseRole.criteria[i]?.weight);
 
-  if (!item || !before) {
-    return <p className="text-sm text-slate-500">No candidates for this role yet.</p>;
-  }
+  if (!item || !before) return <p className="text-sm text-ink-400">No candidates for this role yet.</p>;
 
   const c = item.candidate;
   const evidenced = criteria.filter((cr) => c.evidence[cr.id]);
   const sumW = evidenced.reduce((a, cr) => a + cr.weight, 0);
   const sumWR = evidenced.reduce((a, cr) => a + cr.weight * c.evidence[cr.id]!.rating, 0);
   const rankDelta = before.rank - item.rank;
+  const cov = item.score.coverage / 100;
 
   return (
     <div>
-      <p>
-        Pick a role and a candidate. Moving the slider changes the weights <strong>only on this page</strong> — your real
-        rubric isn't touched.
-      </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <label className="block text-sm">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Role</span>
-          <select className="input" value={roleId} onChange={(e) => setRoleId(e.target.value)}>
-            {state.roles.map((r) => (
-              <option key={r.id} value={r.id}>{r.title}</option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block text-xs font-medium text-slate-500">Candidate</span>
-          <select className="input" value={candidateId} onChange={(e) => setCandidateId(e.target.value)}>
-            {baseRanked.map((r) => (
-              <option key={r.candidate.id} value={r.candidate.id}>#{r.rank} {r.candidate.name}</option>
-            ))}
-          </select>
-        </label>
+      <p className="text-ink-500">Changes here stay on this page.</p>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <select className="input" value={roleId} onChange={(e) => setRoleId(e.target.value)} aria-label="Role">
+          {state.roles.map((r) => (
+            <option key={r.id} value={r.id}>{r.title}</option>
+          ))}
+        </select>
+        <select className="input" value={candidateId} onChange={(e) => setCandidateId(e.target.value)} aria-label="Candidate">
+          {baseRanked.map((r) => (
+            <option key={r.candidate.id} value={r.candidate.id}>#{r.rank} {r.candidate.name}</option>
+          ))}
+        </select>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        <table className="w-full min-w-[520px] text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-            <tr>
-              <th className="px-3 py-2 font-medium">Criterion</th>
-              <th className="px-3 py-2 text-right font-medium">Weight</th>
-              <th className="px-3 py-2 text-right font-medium">Rating</th>
-              <th className="px-3 py-2 text-right font-medium">W × R</th>
-              <th className="px-3 py-2 font-medium">Evidence</th>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[440px] text-sm">
+          <thead className="text-left text-xs text-ink-400">
+            <tr className="border-b border-ink-100">
+              <th className="py-2 pr-2 font-medium">Criterion</th>
+              <th className="py-2 pr-2 text-right font-medium">W</th>
+              <th className="py-2 pr-2 text-right font-medium">R</th>
+              <th className="py-2 pr-2 text-right font-medium">W×R</th>
+              <th className="py-2 font-medium">Evidence</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink-100">
             {criteria.map((cr) => {
               const e = c.evidence[cr.id];
               return (
-                <tr key={cr.id} className={cr.id === sliderId ? 'bg-teal-50/50' : ''}>
-                  <td className="px-3 py-2 text-navy-900">{cr.name}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{cr.weight}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{e ? e.rating : '—'}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{e ? cr.weight * e.rating : <span className="text-slate-400">left out</span>}</td>
-                  <td className="px-3 py-2"><StrengthChip strength={e ? e.strength : 'missing'} /></td>
+                <tr key={cr.id} className={cr.id === sliderId ? 'bg-teal-50/60' : ''}>
+                  <td className="py-2 pr-2 text-ink-800">{cr.name}</td>
+                  <td className="py-2 pr-2 text-right tabular-nums">{cr.weight}</td>
+                  <td className="py-2 pr-2 text-right tabular-nums">{e ? e.rating : '—'}</td>
+                  <td className="py-2 pr-2 text-right tabular-nums">{e ? cr.weight * e.rating : <span className="text-ink-300">—</span>}</td>
+                  <td className="py-2"><StrengthChip strength={e ? e.strength : 'missing'} /></td>
                 </tr>
               );
             })}
@@ -338,13 +253,13 @@ function LiveExample() {
       <Formula>
         fit = {sumWR} ÷ (5 × {sumW}) = {item.score.fit === null ? '—' : `${item.score.fit.toFixed(1)}%`}
         <br />
-        cautious = {(item.score.coverage / 100).toFixed(2)} × {item.score.fit?.toFixed(1) ?? 0} + {(1 - item.score.coverage / 100).toFixed(2)} × {avg.toFixed(1)} = {item.cautiousFit.toFixed(1)}%
+        cautious = {cov.toFixed(2)} × {item.score.fit?.toFixed(1) ?? NEUTRAL_FIT} + {(1 - cov).toFixed(2)} × {NEUTRAL_FIT} = {item.cautiousFit.toFixed(1)}%
       </Formula>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Fit" value={item.score.fit === null ? '—' : `${Math.round(item.score.fit)}%`} />
         <Stat label="Coverage" value={`${Math.round(item.score.coverage)}%`} />
-        <Stat label="Cautious fit" value={`${Math.round(item.cautiousFit)}%`} />
+        <Stat label="Cautious" value={`${Math.round(item.cautiousFit)}%`} />
         <Stat
           label="Rank"
           value={
@@ -352,41 +267,33 @@ function LiveExample() {
               #{item.rank}
               {rankDelta > 0 && <span className="inline-flex items-center text-sm text-teal-700"><ArrowUp className="h-3.5 w-3.5" />{rankDelta}</span>}
               {rankDelta < 0 && <span className="inline-flex items-center text-sm text-rose-600"><ArrowDown className="h-3.5 w-3.5" />{-rankDelta}</span>}
-              {rankDelta === 0 && changed && <Minus className="h-3.5 w-3.5 text-slate-400" />}
+              {rankDelta === 0 && changed && <Minus className="h-3.5 w-3.5 text-ink-300" />}
             </span>
           }
-          sub={changed ? `was #${before.rank} of ${baseRanked.length}` : `of ${baseRanked.length}`}
+          sub={changed ? `was #${before.rank}` : `of ${baseRanked.length}`}
         />
-      </div>
+      </dl>
 
       {slider && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <label className="text-sm sm:w-1/2">
-              <span className="mb-1 block text-xs font-medium text-slate-500">Try changing a weight</span>
-              <select className="input" value={sliderId} onChange={(e) => setSliderId(e.target.value)}>
-                {criteria.map((cr) => (
-                  <option key={cr.id} value={cr.id}>{cr.name}</option>
-                ))}
-              </select>
-            </label>
-            <div className="flex flex-1 items-center gap-3 sm:pt-5">
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={slider.weight}
-                onChange={(e) => setCriteria((cs) => setWeight(cs, sliderId, Number(e.target.value)))}
-                className="h-2 w-full accent-teal-600"
-                aria-label={`Example weight for ${slider.name}`}
-              />
-              <span className="w-10 text-right text-sm font-semibold tabular-nums">{slider.weight}</span>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-            <span>Other weights rebalance so the total stays 100.</span>
+        <div className="mt-6 rounded-2xl bg-ink-50 p-4">
+          <select className="input" value={sliderId} onChange={(e) => setSliderId(e.target.value)} aria-label="Criterion to change">
+            {criteria.map((cr) => (
+              <option key={cr.id} value={cr.id}>{cr.name}</option>
+            ))}
+          </select>
+          <div className="mt-3 flex items-center gap-3">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={slider.weight}
+              onChange={(e) => setCriteria((cs) => setWeight(cs, sliderId, Number(e.target.value)))}
+              className="h-1.5 w-full accent-teal-700"
+              aria-label={`Example weight for ${slider.name}`}
+            />
+            <span className="w-8 text-right text-sm font-semibold tabular-nums">{slider.weight}</span>
             <button className="btn-ghost px-2 py-1 text-xs" onClick={() => setCriteria(baseRole.criteria)} disabled={!changed}>
-              <RotateCcw className="h-3.5 w-3.5" /> Reset example
+              <RotateCcw className="h-3.5 w-3.5" /> Reset
             </button>
           </div>
         </div>
@@ -397,10 +304,10 @@ function LiveExample() {
 
 function Stat({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3">
-      <div className="text-xs font-medium text-slate-500">{label}</div>
-      <div className="mt-0.5 text-xl font-semibold tabular-nums text-navy-900">{value}</div>
-      {sub && <div className="text-xs text-slate-400">{sub}</div>}
+    <div>
+      <dt className="text-xs text-ink-400">{label}</dt>
+      <dd className="mt-0.5 text-2xl font-semibold tabular-nums text-ink-900">{value}</dd>
+      {sub && <dd className="text-xs text-ink-400">{sub}</dd>}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { DemoBadge } from './DemoBadge';
 
+/** Title (2–4 words) + at most one short line. Explanations go behind a "?" or on How it works. */
 export function PageHeader({
   title,
   subtitle,
@@ -11,11 +11,10 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <DemoBadge className="mb-2" />
-        <h1 className="text-2xl font-semibold tracking-tight text-navy-900">{title}</h1>
-        {subtitle && <p className="mt-1 max-w-2xl text-sm text-slate-600">{subtitle}</p>}
+        <h1 className="text-3xl font-semibold text-ink-900 sm:text-[2.1rem]">{title}</h1>
+        {subtitle && <p className="mt-1.5 text-[15px] text-ink-500">{subtitle}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
     </div>

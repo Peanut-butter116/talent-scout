@@ -4,10 +4,10 @@ import { useAppState } from '../state/AppState';
 import { OUTCOME_LABEL, type Candidate, type ChatFeedback, type ChatOutcome, type Role } from '../types';
 import { SidePanel } from './SidePanel';
 
-const OUTCOMES: { id: ChatOutcome; hint: string; cls: string }[] = [
-  { id: 'progress', hint: 'Move to formal process', cls: 'border-emerald-300 bg-emerald-50 text-emerald-800' },
-  { id: 'maybe', hint: 'Not sure yet', cls: 'border-amber-300 bg-amber-50 text-amber-800' },
-  { id: 'not_fit', hint: 'Thank and close', cls: 'border-rose-300 bg-rose-50 text-rose-800' },
+const OUTCOMES: { id: ChatOutcome; cls: string }[] = [
+  { id: 'progress', cls: 'bg-teal-700 text-white' },
+  { id: 'maybe', cls: 'bg-amber-400 text-ink-900' },
+  { id: 'not_fit', cls: 'bg-rose-600 text-white' },
 ];
 
 /** Quick coffee-chat feedback: outcome, optional observed ratings, short note. */
@@ -55,18 +55,18 @@ export function FeedbackForm({
       onClose={onClose}
       title={
         <>
-          <h2 className="text-lg font-semibold text-navy-900">Coffee chat with {candidate.name}</h2>
-          <p className="text-sm text-slate-500">{role.title} · about 30 seconds</p>
+          <h2 className="text-xl font-semibold text-ink-900">Chat with {candidate.name}</h2>
+          <p className="text-sm text-ink-500">{role.title}</p>
         </>
       }
       footer={
-        <button className="btn-teal w-full" onClick={save} disabled={!outcome} data-tour="save-feedback">
-          <Check className="h-4 w-4" /> {existing ? 'Update feedback' : 'Save feedback'}
+        <button className="btn-primary w-full" onClick={save} disabled={!outcome} data-tour="save-feedback">
+          <Check className="h-4 w-4" /> {existing ? 'Update' : 'Save'}
         </button>
       }
     >
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold text-navy-900">1. Outcome</legend>
+        <legend className="mb-2 text-sm font-semibold text-ink-900">Outcome</legend>
         <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Outcome">
           {OUTCOMES.map((o) => (
             <button
@@ -74,20 +74,20 @@ export function FeedbackForm({
               role="radio"
               aria-checked={outcome === o.id}
               onClick={() => setOutcome(o.id)}
-              className={`rounded-xl border-2 px-2 py-3 text-center transition-colors ${
-                outcome === o.id ? o.cls : 'border-slate-200 bg-white text-navy-800 hover:border-slate-300'
+              className={`rounded-full px-2 py-2.5 text-center text-sm font-medium transition-colors ${
+                outcome === o.id ? o.cls : 'bg-ink-100 text-ink-700 hover:bg-ink-200'
               }`}
             >
-              <div className="text-sm font-semibold">{OUTCOME_LABEL[o.id]}</div>
-              <div className="mt-0.5 text-[11px] opacity-70">{o.hint}</div>
+              {OUTCOME_LABEL[o.id]}
             </button>
           ))}
         </div>
       </fieldset>
 
       <fieldset className="mt-6">
-        <legend className="mb-1 text-sm font-semibold text-navy-900">2. What did you see? (optional)</legend>
-        <p className="mb-3 text-xs text-slate-500">Rate only what came up. Skipped criteria don't count either way.</p>
+        <legend className="mb-3 text-sm font-semibold text-ink-900">
+          What you saw <span className="font-normal text-ink-400">· optional</span>
+        </legend>
         <ul className="space-y-3">
           {role.criteria.map((c) => {
             const profile = candidate.evidence[c.id];
@@ -95,10 +95,8 @@ export function FeedbackForm({
             return (
               <li key={c.id}>
                 <div className="mb-1 flex items-baseline justify-between gap-2">
-                  <span className="text-sm text-navy-900">{c.name}</span>
-                  <span className="shrink-0 text-[11px] text-slate-400">
-                    {profile ? `profile ${profile.rating}/5` : 'no profile evidence'}
-                  </span>
+                  <span className="text-sm text-ink-800">{c.name}</span>
+                  <span className="shrink-0 text-[11px] text-ink-400">{profile ? `profile ${profile.rating}` : ''}</span>
                 </div>
                 <div className="flex gap-1" role="radiogroup" aria-label={`Observed rating for ${c.name}`}>
                   <RatingBtn active={v === undefined} onClick={() => setObserved((o) => ({ ...o, [c.id]: undefined }))} wide>
@@ -117,13 +115,15 @@ export function FeedbackForm({
       </fieldset>
 
       <label className="mt-6 block">
-        <span className="mb-1 block text-sm font-semibold text-navy-900">3. One-line note (optional)</span>
+        <span className="mb-1 block text-sm font-semibold text-ink-900">
+          Note <span className="font-normal text-ink-400">· optional</span>
+        </span>
         <input
           className="input"
           value={note}
           maxLength={200}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="e.g. Walked through a system they built end to end"
+          placeholder="One line"
         />
       </label>
     </SidePanel>
@@ -146,8 +146,8 @@ function RatingBtn({
       role="radio"
       aria-checked={active}
       onClick={onClick}
-      className={`${wide ? 'px-2.5' : 'w-9'} h-8 rounded-md border text-xs font-medium tabular-nums transition-colors ${
-        active ? 'border-navy-800 bg-navy-800 text-white' : 'border-slate-300 bg-white text-navy-700 hover:bg-slate-50'
+      className={`${wide ? 'px-2.5' : 'w-9'} h-8 rounded-full text-xs font-medium tabular-nums transition-colors ${
+        active ? 'bg-ink-900 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
       }`}
     >
       {children}

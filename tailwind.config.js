@@ -1,25 +1,45 @@
 /** @type {import('tailwindcss').Config} */
+// Design tokens (see CLAUDE.md → STYLE). Calm, airy, white; near-black ink; one accent (teal).
+// `navy` and `slate` are remapped to neutral greys so the whole app reads as ink-on-white.
+const ink = {
+  50: '#f7f7f7',
+  100: '#efefef',
+  200: '#e4e4e4',
+  300: '#cfcfcf',
+  400: '#a3a3a3',
+  500: '#737373',
+  600: '#525252',
+  700: '#3a3a3a',
+  800: '#222222',
+  900: '#111111',
+  950: '#0a0a0a',
+};
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        navy: {
-          50: '#f3f5f9',
-          100: '#e4e8f0',
-          200: '#c7cfdf',
-          300: '#9ba8c4',
-          400: '#6b7ca3',
-          500: '#4a5b85',
-          600: '#37466b',
-          700: '#2a3756',
-          800: '#1c2640',
-          900: '#121a2e',
-          950: '#0b1120',
-        },
+        navy: ink,
+        slate: ink,
+        ink,
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        sans: [
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Inter',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif',
+        ],
+      },
+      letterSpacing: {
+        tightish: '-0.015em',
       },
       keyframes: {
         moved: {

@@ -28,7 +28,7 @@ Design for clarity and speed, not feature count.
 - All state in one React context + reducer, persisted to localStorage under a single
   versioned key. Each visitor's edits stay private to their browser.
   resetDemo() restores the seed data. Whenever the saved-state shape changes, bump the
-  version and storage key (currently v3) so old saved state resets cleanly.
+  version and storage key (currently v4) so old saved state resets cleanly.
 - Keep code modular: /src/data (seed), /src/lib (scoring, analysis — pure functions
   with tests), /src/state, /src/pages, /src/components.
 
@@ -37,7 +37,8 @@ Design for clarity and speed, not feature count.
   "Lumen Audio Labs", "Northwind Research"). Never use real people or real companies
   as candidates' employers.
 - No photos, ages, gender, nationality or other protected characteristics anywhere.
-- Every page shows a small badge: "Interactive demo · fictional candidates".
+- The "Interactive demo · fictional candidates" badge shows ONCE, in the app header
+  (and in the /review header) — not repeated on every page.
 - Footer/About: "Unofficial concept demo — not a Glot product. Roles are based on
   Glot's public job ads; all candidates and activity are fictional."
 - Never imply simulated analysis is live AI. The on-device matching model is labelled
@@ -146,8 +147,10 @@ than agency (agency ~1 of 5–6 progressed). Every percentage shows its n, e.g.
   High/Medium/Low label. A "How is this calculated?" popover explains it in plain
   English.
 - Missing evidence must NEVER lower the fit score. It lowers confidence only.
-- Ranking uses CAUTIOUS FIT: coverage × fit + (1 − coverage) × role average fit
-  (coverage as a 0–1 share of weight). Equals fit at full coverage. Raw fit and
+- Ranking uses CAUTIOUS FIT: coverage × fit + (1 − coverage) × 50 — unknowns shrink
+  towards a NEUTRAL 50, not the role average (coverage as a 0–1 share of weight).
+  Equals fit at full coverage. Fix ranking problems via the formula, never by editing
+  seed data. Raw fit and
   confidence still display. Default sort = cautious; toggle "Cautious (default) /
   Raw fit". Coverage below 40% → "Needs more evidence" tag and suggested action "Find
   out more before contacting". Shortlist generation and Quick review use cautious fit.
@@ -224,10 +227,56 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
    https://huggingface.co/Xenova/all-MiniLM-L6-v2 , https://www.sbert.net ,
    https://huggingface.co/docs/transformers.js
 
+# STYLE (calm, airy — modelled on glot.com's feel)
+- glot.com could not be reached from the build environment (network policy 403), so
+  the fallback style is used. Never use Glot's logo, wordmark or images. App name stays
+  "Talent Scout" with a small "Unofficial demo" label next to it.
+- Tokens (tailwind.config.js, src/index.css):
+  - Background white (#ffffff). Ink near-black #111111. Secondary grey #737373;
+    muted #a3a3a3; hairlines #efefef/#e4e4e4; surfaces #f7f7f7.
+    (`navy` and `slate` are remapped to this neutral `ink` scale.)
+  - ONE accent: teal (#0f766e / tailwind teal-700) for links, the main accent button,
+    focus rings and small highlights. Semantic dots only for status: teal = good,
+    amber = unclear/weak, rose = not supported/flag.
+  - Font: system sans-serif stack (no web-font download). Headings semibold with
+    slight negative tracking; page titles ~34px; body 15px.
+  - Shapes: pill buttons (rounded-full), 16px cards (rounded-2xl), 24px sheets/modals.
+  - Fewer boxes and borders: borderless grey surfaces (`.card` = bg #f7f7f7), hairline
+    dividers in lists/tables, lots of whitespace (sections ~48–56px apart).
+- Cards over heavy tables on mobile (Candidates, Hypothesis check); board columns stack
+  vertically on phones. Every page must work at 390px with no sideways scroll.
+
+# COPY RULES (write like glot.com)
+- Page header: title of 2–4 words + at most ONE short line under it.
+- Buttons and labels: 1–3 words.
+- No explanatory paragraphs or repeated hints on pages. Put explanations behind a small
+  "?" (InfoTip) or on /how-it-works.
+- Small-sample caveat is one quiet grey line: "Small samples — a guide, not proof."
+- Empty states: one line + (optionally) one button.
+
+# SHARING (CEO review)
+- /review is a standalone, full-screen, mobile-first route (no sidebar) showing only
+  the swipe stack (shared ReviewStack component, same as in-app Quick review).
+- After "Generate shortlist", a popup "Shortlist ready — N candidates" offers
+  "Open review" (new tab) and "Copy link for CEO".
+- Links carry state in the URL HASH and contain ONLY: version, role id (or "all"),
+  week (YYYY-MM-DD), seeded candidate IDs; the results link adds decision codes
+  (a/s/p + skip-reason letter). Never names, evidence or personal data. Decoding
+  validates everything (version, known role, week format, seeded IDs only, max 10,
+  no duplicates) and fails safely with a short message.
+- /review in the SAME browser as the board (all linked candidates already on the board)
+  applies decisions directly; the other tab picks them up via the storage event.
+  In another browser, decisions are kept locally and "Send decisions back" copies a
+  results link. Opening a results link in the app shows "Import CEO decisions?" with a
+  summary; only candidates still in Suggested (or new) are changed.
+- Candidates added via Sourcing are never put in links; show "Added profiles can't be
+  shared by link in the demo."
+- Pipeline keeps the in-app Quick review, with a prominent "Review shortlist" button.
+- The "moved rows" ranking baseline lives in sessionStorage (survives reloads).
+
 # UX
-- Minimal premium SaaS style: navy, white, subtle teal; generous whitespace;
-  readable tables. Fully responsive; sidebar collapses on mobile; tables scroll
-  horizontally inside their container.
+- Fully responsive; sidebar collapses on mobile; wide tables scroll inside their
+  container.
 - First-visit welcome modal: what this is, fictional data, edits stay in your browser.
   Buttons: "Take the 2-minute tour" / "Explore on my own".
 - Guided tour (custom, lightweight): 1) change a weight on Founding AI Engineer →
@@ -296,6 +345,7 @@ for me to say "continue".
 - Phase 3 (done): Pipeline page, including Quick review. Follow-ups done: cautious-fit
   ranking, believable source data, /how-it-works page, profile/contact links, JD links.
 - Phase 4 (done): Learning page (also skip-reason counts per role as a rubric signal).
+  Follow-up done: calm restyle + copy cut, CEO /review share links, neutral-50 cautious fit.
 - Phase 5: Sourcing page, evidence extraction and transparent confidence.
 - Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,
   About, empty states, mobile pass, then a full end-to-end audit of every

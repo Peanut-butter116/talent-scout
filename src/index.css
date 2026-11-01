@@ -2,18 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* STYLE: white page, near-black ink, grey secondary text, one accent (teal-700),
+   pill buttons, 16px card radius, borderless grey surfaces, lots of whitespace. */
+
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
-  body { @apply bg-slate-50 text-navy-900; }
+  body { @apply bg-white text-ink-900 antialiased; }
+  h1, h2, h3 { @apply tracking-tightish; }
 }
 
 @layer components {
-  .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
-  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply btn bg-navy-800 text-white hover:bg-navy-700; }
-  .btn-teal { @apply btn bg-teal-600 text-white hover:bg-teal-700; }
-  .btn-secondary { @apply btn border border-slate-300 bg-white text-navy-800 hover:bg-slate-50; }
-  .btn-ghost { @apply btn text-navy-600 hover:bg-slate-100; }
+  .card { @apply rounded-2xl bg-ink-50; }
+  .surface { @apply rounded-2xl bg-white ring-1 ring-ink-100; }
+  .btn { @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40; }
+  .btn-primary { @apply btn bg-ink-900 text-white hover:bg-ink-700; }
+  .btn-teal { @apply btn bg-teal-700 text-white hover:bg-teal-800; }
+  .btn-secondary { @apply btn bg-white text-ink-900 ring-1 ring-ink-200 hover:bg-ink-50; }
+  .btn-ghost { @apply btn text-ink-600 hover:bg-ink-100 hover:text-ink-900; }
   .chip { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap; }
-  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-navy-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20; }
+  .input { @apply w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/15; }
+  .label { @apply text-xs font-medium text-ink-500; }
 }

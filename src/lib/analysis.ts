@@ -179,10 +179,8 @@ export function suggestRubricChange(
     to: raiseCand.criterion.weight + delta,
   };
   const reason =
-    `High “${shortName(lower.name)}” scorers did no better in chats ` +
-    `(${pct(lowerCand.highAvg)} vs ${pct(lowerCand.lowAvg)} progress score), while high ` +
-    `“${shortName(raise.name)}” scorers did much better (${pct(raiseCand.highAvg)} vs ` +
-    `${pct(raiseCand.lowAvg)}).`;
+    `High ${shortName(lower.name)} scorers did no better (${pct(lowerCand.highAvg)} vs ${pct(lowerCand.lowAvg)}). ` +
+    `High ${shortName(raise.name)} scorers did much better (${pct(raiseCand.highAvg)} vs ${pct(raiseCand.lowAvg)}).`;
 
   return {
     key: `${role.id}:${lower.criterionId}:${lower.from}->${lower.to}:${raise.criterionId}:${raise.from}->${raise.to}`,

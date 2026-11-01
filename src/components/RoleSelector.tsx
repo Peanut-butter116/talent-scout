@@ -3,9 +3,8 @@ import { useAppState } from '../state/AppState';
 export function RoleSelector({ label = 'Role' }: { label?: string }) {
   const { state, dispatch } = useAppState();
   return (
-    <div className="mb-6">
-      <div className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">{label}</div>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Select role">
+    <div className="mb-10">
+      <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist" aria-label={`Select ${label.toLowerCase()}`}>
         {state.roles.map((r) => {
           const active = r.id === state.selectedRoleId;
           return (
@@ -15,10 +14,8 @@ export function RoleSelector({ label = 'Role' }: { label?: string }) {
               aria-selected={active}
               data-tour={`role-${r.id}`}
               onClick={() => dispatch({ type: 'SELECT_ROLE', roleId: r.id })}
-              className={`whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                active
-                  ? 'border-navy-800 bg-navy-800 text-white'
-                  : 'border-slate-300 bg-white text-navy-700 hover:border-navy-400'
+              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
+                active ? 'bg-ink-900 font-medium text-white' : 'text-ink-500 hover:bg-ink-100 hover:text-ink-900'
               }`}
             >
               {r.title}

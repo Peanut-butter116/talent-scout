@@ -1,7 +1,7 @@
-import { ArrowRight, Plus, ShieldCheck } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { CriterionRow } from '../components/CriterionRow';
+import { InfoTip } from '../components/InfoTip';
 import { JdLink } from '../components/JdLink';
 import { PageHeader } from '../components/PageHeader';
 import { RoleSelector } from '../components/RoleSelector';
@@ -34,38 +34,31 @@ export function RolesPage() {
 
   return (
     <>
-      <PageHeader
-        title="Roles & Criteria"
-        subtitle="Every criterion is a hypothesis: “this predicts a strong hire”. Weights always total 100 — move one and the others rebalance proportionally."
-        actions={
-          <Link to="/candidates" className="btn-secondary">
-            See ranking <ArrowRight className="h-4 w-4" />
-          </Link>
-        }
-      />
+      <PageHeader title="Roles & Criteria" subtitle="Each criterion is a bet on what predicts a great hire." />
       <RoleSelector />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="min-w-0 space-y-6 lg:col-span-2">
-          <section className="card p-5">
-            <h2 className="text-lg font-semibold text-navy-900">{role.title}</h2>
-            <p className="mt-1 text-sm text-slate-600">{role.summary}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="text-xs text-slate-400">Paraphrased from Glot's public job ad.</span>
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+        <div className="min-w-0 space-y-12 lg:col-span-2">
+          <section>
+            <p className="text-lg text-ink-700">{role.summary}</p>
+            <div className="mt-2 flex items-center gap-2">
               <JdLink role={role} />
+              <InfoTip label="About this summary">Paraphrased from Glot's public job ad.</InfoTip>
             </div>
           </section>
 
-          <section className="card p-5" aria-labelledby="criteria-h">
+          <section aria-labelledby="criteria-h">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 id="criteria-h" className="font-semibold text-navy-900">Weighted criteria</h2>
-              <span
-                className={`chip tabular-nums ${total === 100 ? 'bg-teal-50 text-teal-700' : 'bg-rose-50 text-rose-700'}`}
-              >
-                Total {total} / 100
-              </span>
+              <h2 id="criteria-h" className="flex items-center gap-1.5 text-lg font-semibold text-ink-900">
+                Criteria
+                <InfoTip label="About weights">
+                  Weights always total 100. Move one and the others rebalance. The chip shows what coffee chats say about
+                  each criterion so far.
+                </InfoTip>
+              </h2>
+              <span className={`text-sm tabular-nums ${total === 100 ? 'text-ink-400' : 'text-rose-600'}`}>{total} / 100</span>
             </div>
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-ink-100">
               {role.criteria.map((c, i) => (
                 <CriterionRow
                   key={c.id}
@@ -77,7 +70,7 @@ export function RolesPage() {
               ))}
             </ul>
             <form
-              className="mt-5 flex gap-2 border-t border-slate-100 pt-4"
+              className="mt-4 flex gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 add();
@@ -85,32 +78,32 @@ export function RolesPage() {
             >
               <input
                 className="input"
-                placeholder="Add a criterion, e.g. “Has shipped a multilingual product”"
+                placeholder="New criterion"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 aria-label="New criterion name"
               />
-              <button className="btn-primary shrink-0" type="submit" disabled={!newName.trim()}>
+              <button className="btn-secondary shrink-0" type="submit" disabled={!newName.trim()}>
                 <Plus className="h-4 w-4" /> Add
               </button>
             </form>
-            <p className="mt-2 text-xs text-slate-500">
-              New criteria start at 10 and have no evidence yet, so they don't change anyone's fit — only their coverage.
-            </p>
           </section>
 
-          <section className="card p-5" aria-labelledby="musthave-h">
-            <div className="mb-3 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-slate-500" aria-hidden />
-              <h2 id="musthave-h" className="font-semibold text-navy-900">Must-have checks</h2>
-            </div>
+          <section aria-labelledby="musthave-h">
+            <h2 id="musthave-h" className="mb-3 flex items-center gap-1.5 text-lg font-semibold text-ink-900">
+              Must-haves
+              <InfoTip label="About must-haves">
+                Yes / No / Unknown. Unknown never excludes anyone — check at the first call. Only an explicit No flags a
+                candidate.
+              </InfoTip>
+            </h2>
             {role.mustHaves.length === 0 ? (
-              <p className="text-sm text-slate-500">No must-have checks for this role.</p>
+              <p className="text-sm text-ink-400">None for this role.</p>
             ) : (
               <ul className="space-y-2">
                 {role.mustHaves.map((m) => (
                   <li key={m.id} className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-navy-900">{m.label}</span>
+                    <span className="text-sm text-ink-800">{m.label}</span>
                     <Toggle
                       checked={m.enabled}
                       label={m.label}
@@ -120,13 +113,10 @@ export function RolesPage() {
                 ))}
               </ul>
             )}
-            <p className="mt-3 text-xs text-slate-500">
-              Answers are Yes / No / Unknown. Unknown never excludes anyone — it shows “Check at first call”. Only an explicit No flags a candidate.
-            </p>
           </section>
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="min-w-0 lg:col-span-1">
           <WeightHistory />
         </div>
       </div>
@@ -142,7 +132,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
       aria-label={`${label} ${checked ? 'on' : 'off'}`}
       onClick={onChange}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        checked ? 'bg-teal-600' : 'bg-slate-300'
+        checked ? 'bg-teal-700' : 'bg-ink-200'
       }`}
     >
       <span
