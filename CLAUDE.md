@@ -20,12 +20,15 @@ Design for clarity and speed, not feature count.
 - Static single-page app deployed on Vercel. Add a vercel.json rewrite so every
   route serves index.html (deep links and refresh must not 404).
 - No backend, no database, no API keys, no real email, no scraping, no analytics.
-- Network calls: the ONLY ones allowed are (a) downloading the on-device embedding
-  model files for evidence extraction (see SOURCING), and (b) opening LinkedIn search
-  links in a new tab when the user clicks. Profile text is never sent anywhere.
+- Network: the app itself makes NO network calls except downloading the on-device
+  embedding model files for evidence extraction (see SOURCING). External links that
+  open in a new tab when the user clicks are allowed: Glot job-description links,
+  LinkedIn search/profile links, and the model sources on /how-it-works. Profile text
+  is never sent anywhere.
 - All state in one React context + reducer, persisted to localStorage under a single
   versioned key. Each visitor's edits stay private to their browser.
-  resetDemo() restores the seed data.
+  resetDemo() restores the seed data. Whenever the saved-state shape changes, bump the
+  version and storage key (currently v3) so old saved state resets cleanly.
 - Keep code modular: /src/data (seed), /src/lib (scoring, analysis — pure functions
   with tests), /src/state, /src/pages, /src/components.
 
@@ -52,9 +55,18 @@ Glot-wide qualities appear in every role, marked with a "Glot-wide quality" badg
   maintained one.
 - Low ego: here to build, not to be seen building; changes mind when reasoning is sound.
 
-Each role has a one-line summary (paraphrased, shown on the Roles page), weighted
-criteria summing to 100, and optional must-have checks. Each criterion also has a
+Each role has a one-line summary (paraphrased, shown on the Roles page), a jdUrl
+(Glot's public job ad, shown as "View job description ↗" on Roles & Criteria, the
+Candidates header and Sourcing), weighted criteria summing to 100, and optional
+must-have checks. Each criterion also has a
 one-line description and 3–5 example phrases (used by evidence extraction).
+
+JD links:
+- Founding AI Engineer: https://jobs.ashbyhq.com/glot/f529d4cb-dec4-4db8-987b-acc64bec9782
+- Full Stack Engineer: https://jobs.ashbyhq.com/glot/e1dfbeef-d771-4cc2-9d32-404a9c7311d6
+- Head of Engineering: https://jobs.ashbyhq.com/glot/1efd6395-c9d0-44e3-8195-4390745161f2
+- Business Operations: https://jobs.ashbyhq.com/glot/c1278e4e-078f-47c0-920d-2ce93234350c
+- Talent Partner: https://jobs.ashbyhq.com/glot/ebd0691d-9abd-46b2-9ae5-5eaa3cc807f8
 
 1. Founding AI Engineer — owns AI direction and model architecture; sits on the
    senior leadership committee.
@@ -111,6 +123,17 @@ demo with <300ms latency" (strong), "Lists 'speech' as a skill, no project shown
 (weak). Deliberately include: thin-evidence candidates, a polished-profile candidate
 with weak builder evidence, and an unconventional candidate with little pedigree but
 strong builder evidence.
+Optional fields: profileUrl and contactNote. Seeded fictional candidates NEVER get a
+profileUrl (no invented linkedin.com/in/... links — they could point to real people);
+their "View profile" is disabled with tooltip "Demo candidate — no real profile".
+Profiles added via Sourcing use the URL the user pastes, accepted only if it is a valid
+https://www.linkedin.com/in/... URL. "Contact" opens the outreach draft (draft only,
+not sent) with "Copy message" and "Open profile to message" (new tab). These actions
+appear in the Candidates table (profile icon), side panel, board cards and the back of
+Quick review cards.
+Seed source results are believable, not extreme: direct channels do somewhat better
+than agency (agency ~1 of 5–6 progressed). Every percentage shows its n, e.g.
+"17% (1 of 6)", with the caption "Demo data. Small samples — indicative only."
 
 # SCORING
 - Fit score = weighted average over criteria WITH evidence only (re-normalise weights
@@ -123,6 +146,11 @@ strong builder evidence.
   High/Medium/Low label. A "How is this calculated?" popover explains it in plain
   English.
 - Missing evidence must NEVER lower the fit score. It lowers confidence only.
+- Ranking uses CAUTIOUS FIT: coverage × fit + (1 − coverage) × role average fit
+  (coverage as a 0–1 share of weight). Equals fit at full coverage. Raw fit and
+  confidence still display. Default sort = cautious; toggle "Cautious (default) /
+  Raw fit". Coverage below 40% → "Needs more evidence" tag and suggested action "Find
+  out more before contacting". Shortlist generation and Quick review use cautious fit.
 
 # PAGES
 Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip on Pipeline.
@@ -181,6 +209,20 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
    - Suggested rubric change for the selected role, e.g. "Lower High-bar background
      10 → 5, raise Builder 10 → 15", with a one-line reason. Accept / Dismiss.
      Accept updates weights, logs to Weight history, and Candidates re-rank.
+
+5. How ranking works (/how-it-works) — full page, NOT in the sidebar. Linked from the
+   Pipeline header, Candidates header and the "How is this calculated?" popover; back
+   link to where the user came from. Plain English, short sections, small formulas,
+   mobile-readable: (1) big idea + loop diagram, (2) evidence ratings, (3) fit,
+   (4) cautious fit, (5) confidence, (6) LIVE worked example using the app's own
+   scoring functions with a local weight slider showing rank changes, (7) learning
+   labels + suggested weight changes, (8) evidence matching model (placeholder until
+   Phase 5, then a real explanation: sentence embeddings, cosine similarity,
+   thresholds, keyword fallback, on-device, nothing uploaded), (9) limits and human
+   oversight, (10) sources — ONLY these links:
+   https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2 ,
+   https://huggingface.co/Xenova/all-MiniLM-L6-v2 , https://www.sbert.net ,
+   https://huggingface.co/docs/transformers.js
 
 # UX
 - Minimal premium SaaS style: navy, white, subtle teal; generous whitespace;
@@ -251,7 +293,8 @@ for me to say "continue".
   (weights re-rank correctly; missing evidence never lowers fit; must-have Unknown
   never excludes; reset restores seed; hypothesis labels behave on seeded data).
 - Phase 2 (done): Roles & Criteria page and Candidates page.
-- Phase 3: Pipeline page, including Quick review.
+- Phase 3 (done): Pipeline page, including Quick review. Follow-ups done: cautious-fit
+  ranking, believable source data, /how-it-works page, profile/contact links, JD links.
 - Phase 4: Learning page (also skip-reason counts per role as a rubric signal).
 - Phase 5: Sourcing page, evidence extraction and transparent confidence.
 - Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,

@@ -2,6 +2,7 @@ import { ArrowRight, Plus, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CriterionRow } from '../components/CriterionRow';
+import { JdLink } from '../components/JdLink';
 import { PageHeader } from '../components/PageHeader';
 import { RoleSelector } from '../components/RoleSelector';
 import { WeightHistory } from '../components/WeightHistory';
@@ -49,7 +50,10 @@ export function RolesPage() {
           <section className="card p-5">
             <h2 className="text-lg font-semibold text-navy-900">{role.title}</h2>
             <p className="mt-1 text-sm text-slate-600">{role.summary}</p>
-            <p className="mt-2 text-xs text-slate-400">Paraphrased from Glot's public job ad.</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="text-xs text-slate-400">Paraphrased from Glot's public job ad.</span>
+              <JdLink role={role} />
+            </div>
           </section>
 
           <section className="card p-5" aria-labelledby="criteria-h">

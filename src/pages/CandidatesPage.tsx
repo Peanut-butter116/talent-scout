@@ -7,7 +7,11 @@ import { EmptyState } from '../components/EmptyState';
 import { FitBar } from '../components/FitBar';
 import { PageHeader } from '../components/PageHeader';
 import { RoleSelector } from '../components/RoleSelector';
-import type { Confidence } from '../lib/scoring';
+import type { Confidence, SortMode } from '../lib/scoring';
+import { HowCalculated } from '../components/HowCalculated';
+import { HowItWorksLink } from '../components/HowItWorksLink';
+import { JdLink } from '../components/JdLink';
+import { ProfileLink } from '../components/ProfileActions';
 import { useSelectedRole } from '../state/AppState';
 import { useRanked } from '../state/hooks';
 import { diffRanks } from '../state/rankMemory';
@@ -17,7 +21,8 @@ type Flash = { moved: Record<string, number>; tick: number };
 
 export function CandidatesPage() {
   const role = useSelectedRole();
-  const ranked = useRanked(role);
+  const [sort, setSort] = useState<SortMode>('cautious');
+  const ranked = useRanked(role, sort);
   const [minFit, setMinFit] = useState(0);
   const [confidence, setConfidence] = useState<Confidence | 'all'>('all');
   const [source, setSource] = useState<SourceChannel | 'all'>('all');
@@ -53,7 +58,13 @@ export function CandidatesPage() {
     <>
       <PageHeader
         title="Candidates"
-        subtitle="Ranked by fit against the role's weighted criteria. Change a weight and the ranking updates live — rows that move are highlighted."
+        subtitle="Ranked by cautious fit against the role's weighted criteria. Change a weight and the ranking updates live — rows that move are highlighted."
+        actions={
+          <>
+            <JdLink role={role} />
+            <HowItWorksLink />
+          </>
+        }
       />
       <RoleSelector />
 
@@ -83,6 +94,22 @@ export function CandidatesPage() {
               ))}
             </select>
           </Filter>
+          <div className="block md:w-56">
+            <span className="mb-1 block text-xs font-medium text-slate-500">Sort by</span>
+            <div className="inline-flex w-full rounded-lg border border-slate-300 bg-white p-0.5" role="radiogroup" aria-label="Sort by">
+              {(['cautious', 'raw'] as SortMode[]).map((m) => (
+                <button
+                  key={m}
+                  role="radio"
+                  aria-checked={sort === m}
+                  onClick={() => setSort(m)}
+                  className={`flex-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm font-medium ${sort === m ? 'bg-navy-800 text-white' : 'text-navy-700 hover:bg-slate-100'}`}
+                >
+                  {m === 'cautious' ? 'Cautious (default)' : 'Raw fit'}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             className="btn-secondary md:ml-auto"
             onClick={() => setShowWeights((s) => !s)}
@@ -167,12 +194,25 @@ export function CandidatesPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className="whitespace-nowrap font-medium text-navy-900">{r.candidate.name}</span>
+                          <ProfileLink candidate={r.candidate} iconOnly className="rounded p-0.5 text-slate-400 hover:text-teal-700" />
                           {r.mustHaves.flagged && <FlagChip label="Must-have" />}
                         </div>
+                        {r.needsMoreEvidence && (
+                          <span className="chip mt-1 bg-amber-50 text-amber-700" title="Find out more before contacting">
+                            Needs more evidence
+                          </span>
+                        )}
                         <div className="whitespace-nowrap text-xs text-slate-500">{r.candidate.employer}</div>
                       </td>
                       <td className="max-w-[240px] px-4 py-3 text-slate-600">{r.candidate.headline}</td>
-                      <td className="px-4 py-3"><FitBar fit={r.score.fit} /></td>
+                      <td className="px-4 py-3">
+                        <FitBar fit={r.score.fit} />
+                        {r.score.fit !== null && Math.round(r.cautiousFit) !== Math.round(r.score.fit) && (
+                          <span className="mt-0.5 block text-xs text-slate-400" title="Cautious fit — used for ranking">
+                            cautious {Math.round(r.cautiousFit)}%
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-slate-600">
                         <span className="tabular-nums">{Math.round(r.score.coverage)}%</span>
                         <span className="block text-xs text-slate-400">{r.score.evidencedCount} of {r.score.totalCount}</span>
@@ -186,9 +226,15 @@ export function CandidatesPage() {
               </tbody>
             </table>
           </div>
-          <p className="border-t border-slate-100 px-4 py-2.5 text-xs text-slate-500">
-            Coverage = share of total weight with evidence. Missing evidence lowers confidence, never fit. Click a row for details.
-          </p>
+          <div className="flex flex-col gap-2 border-t border-slate-100 px-4 py-2.5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              {sort === 'cautious'
+                ? 'Ranked by cautious fit: thin profiles are pulled towards the role average.'
+                : 'Ranked by raw fit only — thin profiles may rank high.'}{' '}
+              Missing evidence lowers confidence, never fit. Click a row for details.
+            </p>
+            <HowCalculated align="right" />
+          </div>
         </div>
       )}
 
