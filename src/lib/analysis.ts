@@ -205,3 +205,21 @@ function pct(x: number | null): string {
 function avg(xs: number[]): number | null {
   return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
 }
+
+/** Plain-English rubric hint from Quick review skip reasons. Null when there's no clear signal. */
+export function skipSignal(counts: Record<string, number>): string | null {
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (total < 2) return null;
+  const [top, n] = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  if (n / total < 0.5) return null;
+  switch (top) {
+    case 'not_enough_evidence':
+      return 'Most skips are for thin evidence — source richer profiles, or ask one screening question before shortlisting.';
+    case 'wrong_seniority':
+      return 'Most skips are for seniority — tighten the search titles or years-of-experience filters on Sourcing.';
+    case 'missing_skill':
+      return 'Most skips are for a missing key skill — consider raising that criterion’s weight or making it a must-have.';
+    default:
+      return null;
+  }
+}

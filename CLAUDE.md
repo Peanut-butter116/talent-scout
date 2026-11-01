@@ -295,7 +295,7 @@ for me to say "continue".
 - Phase 2 (done): Roles & Criteria page and Candidates page.
 - Phase 3 (done): Pipeline page, including Quick review. Follow-ups done: cautious-fit
   ranking, believable source data, /how-it-works page, profile/contact links, JD links.
-- Phase 4: Learning page (also skip-reason counts per role as a rubric signal).
+- Phase 4 (done): Learning page (also skip-reason counts per role as a rubric signal).
 - Phase 5: Sourcing page, evidence extraction and transparent confidence.
 - Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,
   About, empty states, mobile pass, then a full end-to-end audit of every

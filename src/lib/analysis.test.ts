@@ -3,7 +3,7 @@ import { SEED_CANDIDATES } from '../data/candidates';
 import { SEED_CHATS } from '../data/chats';
 import { SEED_ROLES } from '../data/roles';
 import type { ChatFeedback } from '../types';
-import { analyzeRole, labelFor, overstatedCriteria, suggestRubricChange } from './analysis';
+import { analyzeRole, labelFor, overstatedCriteria, skipSignal, suggestRubricChange } from './analysis';
 
 const role = (id: string) => SEED_ROLES.find((r) => r.id === id)!;
 const analyze = (id: string, chats: ChatFeedback[] = SEED_CHATS) =>
@@ -96,5 +96,25 @@ describe('suggestRubricChange', () => {
 
   it('suggests nothing with no chats', () => {
     expect(suggestRubricChange(role('ai-eng'), analyze('ai-eng', []))).toBeNull();
+  });
+});
+
+describe('skipSignal', () => {
+  it('needs at least 2 skips and a clear majority', () => {
+    const z = { not_enough_evidence: 0, wrong_seniority: 0, missing_skill: 0, other: 0 };
+    expect(skipSignal(z)).toBeNull();
+    expect(skipSignal({ ...z, missing_skill: 1 })).toBeNull();
+    expect(skipSignal({ ...z, missing_skill: 2, other: 1 })).toMatch(/missing key skill/);
+    expect(skipSignal({ ...z, missing_skill: 1, wrong_seniority: 1, other: 1 })).toBeNull();
+  });
+});
+
+describe('logging chats updates the analysis', () => {
+  it('a new chat can move a criterion out of "Not tested yet"', () => {
+    const extra: ChatFeedback = { id: 'x', candidateId: 'c-theo', roleId: 'ai-eng', outcome: 'not_fit', observed: {}, note: '', at: '' };
+    // Theo had no judgement evidence; add a chat for a candidate who does: Sam already has one.
+    expect(labelOf('ai-eng', 'ai_judgement', [...SEED_CHATS, extra])).toBe('Not tested yet');
+    const withJordan = [...SEED_CHATS, { ...extra, id: 'y', candidateId: 'c-jordan', outcome: 'progress' as const }];
+    expect(labelOf('ai-eng', 'ai_judgement', withJordan)).not.toBe('Not tested yet');
   });
 });
