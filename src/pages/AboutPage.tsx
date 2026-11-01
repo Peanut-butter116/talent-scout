@@ -216,9 +216,19 @@ export function AboutPage() {
       </Section>
 
       <Section n={9} id="built" title="Built with">
+        <p>React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Developed with Claude Code.</p>
         <p>
-          React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Evidence matching uses Transformers.js with the
-          all-MiniLM-L6-v2 sentence-embedding model, running in the browser. Developed with Claude Code.
+          Evidence matching runs{' '}
+          <Ext href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</Ext> (Apache 2.0) in your
+          browser with <Ext href="https://huggingface.co/docs/transformers.js">Transformers.js</Ext> (Apache 2.0) and{' '}
+          <Ext href="https://github.com/microsoft/onnxruntime">ONNX Runtime Web</Ext> (MIT). Font: Plus Jakarta Sans (OFL 1.1).
+        </p>
+        <p className="text-sm text-ink-500">
+          Licences:{' '}
+          <a className="underline underline-offset-4" href="/licenses/all-MiniLM-L6-v2-Apache-2.0.txt">model</a> ·{' '}
+          <a className="underline underline-offset-4" href="/licenses/transformers.js-Apache-2.0.txt">Transformers.js</a> ·{' '}
+          <a className="underline underline-offset-4" href="/licenses/onnxruntime-MIT.txt">ONNX Runtime</a> ·{' '}
+          <a className="underline underline-offset-4" href="/licenses/plus-jakarta-sans-OFL-1.1.txt">font</a>
         </p>
       </Section>
 
@@ -238,11 +248,19 @@ function Section({ n, id, title, children }: { n: number; id: string; title: str
   return (
     <section id={id} className="mt-14 scroll-mt-24 space-y-3">
       <h2 className="text-xl font-semibold tracking-tightish text-ink-900">
-        <span className="mr-2 text-ink-300">{n}</span>
+        <span className="mr-2 text-ink-400">{n}</span>
         {title}
       </h2>
       {children}
     </section>
+  );
+}
+
+function Ext({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900">
+      {children}
+    </a>
   );
 }
 

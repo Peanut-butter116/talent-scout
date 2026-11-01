@@ -54,7 +54,7 @@ export function InfoTip({
         >
           <button
             type="button"
-            className="absolute right-2 top-2 p-1 text-ink-300 hover:text-ink-600"
+            className="absolute right-2 top-2 p-1 text-ink-400 hover:text-ink-600"
             onClick={() => setOpen(false)}
             aria-label="Close"
           >

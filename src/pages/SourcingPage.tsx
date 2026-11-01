@@ -66,7 +66,7 @@ function AddedProfiles() {
                   <button className="btn-ghost px-2 py-1 text-xs" onClick={() => setConfirm(null)}>Cancel</button>
                 </span>
               ) : (
-                <button className="btn-ghost p-2 text-ink-300 hover:text-rose-600" onClick={() => setConfirm(r.candidate.id)} aria-label={`Delete ${r.candidate.name}`}>
+                <button className="btn-ghost p-2 text-ink-400 hover:text-rose-600" onClick={() => setConfirm(r.candidate.id)} aria-label={`Delete ${r.candidate.name}`}>
                   <Trash2 className="h-4 w-4" />
                 </button>
               )}
@@ -112,7 +112,7 @@ function SavedSearches() {
                     <a href={linkedInSearchUrl(s.query)} target="_blank" rel="noopener noreferrer" className="btn-ghost p-2" aria-label="Open in LinkedIn">
                       <ExternalLink className="h-4 w-4" />
                     </a>
-                    <button className="btn-ghost p-2 text-ink-300 hover:text-rose-600" onClick={() => dispatch({ type: 'DELETE_SEARCH', searchId: s.id })} aria-label="Delete saved search">
+                    <button className="btn-ghost p-2 text-ink-400 hover:text-rose-600" onClick={() => dispatch({ type: 'DELETE_SEARCH', searchId: s.id })} aria-label="Delete saved search">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>

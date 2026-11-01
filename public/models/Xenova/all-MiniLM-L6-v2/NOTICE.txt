@@ -1,0 +1,5 @@
+all-MiniLM-L6-v2 — sentence-transformers, licensed under the Apache License 2.0 (see LICENSE.txt).
+Model card: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+ONNX conversion and quantization: https://huggingface.co/Xenova/all-MiniLM-L6-v2
+Files are redistributed unmodified (onnx/model_quantized.onnx SHA-256
+afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1).

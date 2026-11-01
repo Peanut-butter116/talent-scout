@@ -6,6 +6,7 @@ import { DemoBadge } from './DemoBadge';
 import { BuiltForGlot } from './GlotLogo';
 import { Footer } from './Disclaimer';
 import { ImportDecisions } from './ImportDecisions';
+import { TourProvider, useTour, WelcomeModal } from './Tour';
 
 const NAV = [
   { to: '/roles', label: 'Roles & Criteria', icon: ListChecks },
@@ -16,6 +17,24 @@ const NAV = [
 ];
 
 export function Layout() {
+  return (
+    <TourProvider>
+      <Shell />
+      <WelcomeModal />
+    </TourProvider>
+  );
+}
+
+function TourLink({ className }: { className: string }) {
+  const { start } = useTour();
+  return (
+    <button className={className} onClick={start}>
+      Tour
+    </button>
+  );
+}
+
+function Shell() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   useEffect(() => setOpen(false), [location.pathname]);
@@ -26,6 +45,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-white">
+      <a href="#main" className="skip-link">Skip to content</a>
       <header className="sticky top-0 z-30 border-b border-ink-100 bg-white/90 backdrop-blur">
         <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
           <button
@@ -39,12 +59,14 @@ export function Layout() {
           <Brand />
           <BuiltForGlot className="ml-auto sm:ml-3 sm:border-l sm:border-ink-200 sm:pl-3" />
           <div className="ml-auto hidden items-center gap-4 sm:flex">
+            <TourLink className="text-sm text-ink-500 hover:text-ink-900" />
             <NavLink to="/about" className="text-sm text-ink-500 hover:text-ink-900">About</NavLink>
             <DemoBadge />
           </div>
         </div>
         <div className="flex items-center justify-center gap-3 border-t border-ink-100 py-1.5 sm:hidden">
           <DemoBadge />
+          <TourLink className="text-xs text-ink-500 hover:text-ink-900" />
           <NavLink to="/about" className="text-xs text-ink-500 hover:text-ink-900">About</NavLink>
         </div>
       </header>
@@ -94,7 +116,7 @@ export function Layout() {
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-6 pt-8 sm:px-8 lg:px-12 lg:pt-10">
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none px-4 pb-6 pt-8 sm:px-8 lg:px-12 lg:pt-10">
           <div className="mx-auto max-w-5xl">
             <Outlet />
             <Footer />

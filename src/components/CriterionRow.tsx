@@ -95,7 +95,7 @@ export function CriterionRow({
             <div className="flex items-start gap-2">
               <span className="text-[15px] text-ink-900">{criterion.name}</span>
               <button
-                className="mt-1 text-ink-300 hover:text-ink-700"
+                className="mt-1 text-ink-400 hover:text-ink-700"
                 onClick={() => {
                   setDraft(criterion.name);
                   setEditing(true);
@@ -129,7 +129,7 @@ export function CriterionRow({
             </div>
           ) : (
             <button
-              className="btn-ghost p-1.5 text-ink-300 hover:text-rose-600 disabled:hover:text-ink-300"
+              className="btn-ghost p-1.5 text-ink-400 hover:text-rose-600 disabled:hover:text-ink-300"
               onClick={() => setConfirmRemove(true)}
               disabled={role.criteria.length <= 1}
               aria-label={`Remove ${criterion.name}`}
