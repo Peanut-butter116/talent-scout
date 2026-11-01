@@ -139,7 +139,9 @@ This is a demo: data lives in one browser and samples are tiny. A real version w
 
 ## 9. Built with
 
-React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Evidence matching uses Transformers.js with the [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) sentence-embedding model ([browser version](https://huggingface.co/Xenova/all-MiniLM-L6-v2)), running in the browser. Developed with Claude Code.
+React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Developed with Claude Code.
+
+Credits: evidence matching runs [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) (Apache 2.0; [browser version](https://huggingface.co/Xenova/all-MiniLM-L6-v2)) in the browser with [Transformers.js](https://huggingface.co/docs/transformers.js) (Apache 2.0) and [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) (MIT). Font: Plus Jakarta Sans (OFL 1.1). Licence texts: `public/licenses/`; see `THIRD_PARTY_NOTICES.md`.
 
 The quantized model files live in `public/models/` (served from this site; no requests to Hugging Face at runtime). `npm run fetch-model` re-downloads them and checks the SHA-256 Hugging Face publishes. The ONNX runtime files are copied into `public/ort/` before every build.
 
@@ -150,7 +152,9 @@ npm test        # Vitest
 npm run build   # type-check + production build
 ```
 
-`vercel.json` rewrites every route to `index.html`, so deep links work. No backend; state lives in the browser's localStorage. See `CLAUDE.md` for the full product brief.
+`vercel.json` rewrites every route (except `/models`, `/ort`, `/assets`) to `index.html`, so deep links work, and sets long immutable caching plus the right content types for the model (`.onnx`) and runtime (`.wasm`).
+
+**Check the on-device model on a deployment:** open `/sourcing`, click an example under *Try an example*. The review should say *"Suggested by an on-device matching model — please check."* (the keyword fallback says *"Suggested by keyword matching (model unavailable)"*). In DevTools → Network you should see `/models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx` and `/ort/<version>/ort-wasm-simd-threaded.jsep.wasm` load with status 200 from your own domain — and no requests to huggingface.co or any CDN. No backend; state lives in the browser's localStorage. See `CLAUDE.md` for the full product brief.
 
 ## 10. Contact
 

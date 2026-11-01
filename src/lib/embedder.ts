@@ -20,7 +20,7 @@ export function loadEmbedder(): Promise<Embed> {
       t.env.localModelPath = '/models/';
       const wasm = t.env.backends.onnx.wasm;
       if (wasm) {
-        wasm.wasmPaths = '/ort/';
+        wasm.wasmPaths = `/ort/${__ORT_VERSION__}/`;
         wasm.numThreads = 1;
       }
       const extractor = await t.pipeline('feature-extraction', MODEL_ID, { dtype: 'q8', device: 'wasm' });

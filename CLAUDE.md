@@ -17,8 +17,17 @@ Design for clarity and speed, not feature count.
 
 # TECH
 - Vite + React + TypeScript, Tailwind CSS, lucide-react icons, Vitest for tests.
-- Static single-page app deployed on Vercel. Add a vercel.json rewrite so every
-  route serves index.html (deep links and refresh must not 404).
+- Static single-page app deployed on Vercel. vercel.json rewrites every route except
+  /models, /ort and /assets to index.html (deep links and refresh must not 404), sets
+  immutable caching for /models, /ort and /assets, and Content-Type for .wasm
+  (application/wasm), .onnx (application/octet-stream) and .mjs.
+- Sharing tags: title "Talent Scout — candidate outreach demo for Glot", one-sentence
+  meta description, Open Graph/Twitter tags with /og-image.png (1200×630, plain, no Glot
+  logo). Absolute URLs come from SITE_URL or Vercel's VERCEL_PROJECT_PRODUCTION_URL /
+  VERCEL_URL at build time. Favicon is a neutral black Talent Scout magnifier.
+- Licences: THIRD_PARTY_NOTICES.md and /public/licenses (model Apache-2.0,
+  Transformers.js Apache-2.0, ONNX Runtime MIT, Plus Jakarta Sans OFL); LICENSE.txt and
+  NOTICE.txt next to the model files. Credited in About ("Built with") and README.
 - No backend, no database, no API keys, no real email, no scraping, no analytics.
 - Network: the app itself makes NO third-party network calls except downloading the
   on-device embedding model files for evidence extraction (see SOURCING). External links that
@@ -235,7 +244,8 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
 - Measured from www.glot.com (desktop 1440px + mobile 390px screenshots, computed styles):
   - Background #ffffff. Ink #111111 (rgb 17,17,17) for text and primary buttons.
     Warm greys: secondary #52524F, tertiary #6E6E6A, muted #8A8A86; surface #F2F2F0;
-    hairline #ECECEC. Glot's UI is essentially monochrome; a muted red #CB4644 appears
+    hairline #ECECEC. (Our `ink-400` is darkened to #6E6E6A and `ink-500` to #5E5E5A so
+    small grey text passes WCAG AA 4.5:1; `ink-300` is for decoration/disabled only.) Glot's UI is essentially monochrome; a muted red #CB4644 appears
     only as a small detail.
   - Font: "Plus Jakarta Sans" (variable). Self-hosted via @fontsource-variable/
     plus-jakarta-sans so no third-party font request is made. Headings weight 600 with
@@ -299,12 +309,16 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
 # UX
 - Fully responsive; sidebar collapses on mobile; wide tables scroll inside their
   container.
-- First-visit welcome modal: what this is, fictional data, edits stay in your browser.
-  Buttons: "Take the 2-minute tour" / "Explore on my own".
-- Guided tour (custom, lightweight): 1) change a weight on Founding AI Engineer →
-  2) see Candidates re-rank → 3) try an example profile on Sourcing → 4) generate &
-  approve shortlist → 5) log a coffee chat → 6) accept the suggested rubric change →
-  done.
+- First-visit welcome modal: 2 short lines + "Take the tour" / "Explore". Shown once
+  per browser (state.welcomeSeen); "Tour" link in the header restarts the tour.
+- Guided tour (components/Tour.tsx; max 6 steps, skippable, one sentence each, bottom
+  card on mobile): 1) change a weight on Founding AI Engineer → 2) see Candidates
+  re-rank → 3) Sourcing: try an example profile → 4) Generate shortlist and open the CEO
+  review → 5) log a coffee chat → 6) accept the suggested change → "That's the loop".
+  Each step navigates, outlines its data-tour target and ticks when done; never
+  auto-navigates on completion. Position kept in sessionStorage; Reset clears it.
+- Accessibility: visible :focus-visible outline everywhere, skip-to-content link,
+  keyboard-operable table rows, review stack and dialogs (Escape closes).
 - Reset Demo button in the sidebar (with confirm). About this project section.
 - Friendly empty states everywhere.
 
@@ -331,7 +345,9 @@ structured evidence, entirely in their browser.
   Xenova/all-MiniLM-L6-v2 model, SELF-HOSTED: model files in /public/models/Xenova/
   all-MiniLM-L6-v2/ (onnx/model_quantized.onnx, SHA-256 afdb6f1a…48bdb1, verified against
   Hugging Face's published hash) and the ONNX runtime wasm in /public/ort/ (copied from
-  node_modules by scripts/copy-ort.mjs before dev/build; git-ignored). transformers.js is
+  node_modules by scripts/copy-ort.mjs before dev/build into /public/ort/<onnxruntime-web
+  version>/ so immutable caching is safe; git-ignored; scripts/prune-dist.mjs removes the
+  unused copy Vite emits). transformers.js is
   configured with allowRemoteModels = false, localModelPath = /models/, wasmPaths = /ort/:
   no requests to Hugging Face or any CDN at runtime. `npm run fetch-model` re-downloads
   the model from Hugging Face (needs huggingface.co + *.hf.co) and checks hashes.
@@ -380,7 +396,6 @@ for me to say "continue".
   glot.com-matched style, Glot logo, credit line, README-style About, 41 candidates.
 - Phase 5 (done): Sourcing page, self-hosted on-device evidence extraction with keyword
   fallback, transparent confidence formula, How it works §8, About/README Sourcing steps.
-- Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,
-  About, empty states, mobile pass, then a full end-to-end audit of every
-  interaction. Fix bugs. Confirm no real names, keys or unexpected network calls.
-  Final test + build.
+- Phase 6 (done): welcome modal, 6-step tour, Vercel caching/content-type headers,
+  versioned ORT path, licences and credits, sharing tags + OG image + favicon, full audit
+  (links, console, keyboard/focus, contrast, 390px, Reset, no outside requests).

@@ -164,7 +164,7 @@ function Section({ n, id, title, children }: { n: number; id: string; title: str
   return (
     <section id={id} className="mt-14 scroll-mt-24 text-[15px] leading-relaxed text-ink-700">
       <h2 className="mb-3 text-xl font-semibold text-ink-900">
-        <span className="mr-2 text-ink-300">{n}</span>
+        <span className="mr-2 text-ink-400">{n}</span>
         {title}
       </h2>
       {children}

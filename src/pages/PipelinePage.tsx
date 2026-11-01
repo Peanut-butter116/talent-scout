@@ -239,7 +239,7 @@ function Board({
                   <span className="text-xs tabular-nums text-ink-400">{items.length}</span>
                 </div>
                 <div className="flex max-h-[34rem] flex-col gap-2 overflow-y-auto">
-                  {items.length === 0 && <p className="hidden px-2 py-3 text-xs text-ink-300 md:block">Empty</p>}
+                  {items.length === 0 && <p className="hidden px-2 py-3 text-xs text-ink-400 md:block">Empty</p>}
                   {items.map((r) => (
                     <BoardCard
                       key={r.candidate.id}
@@ -304,9 +304,9 @@ function BoardCard({
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="text-sm font-semibold tabular-nums text-ink-900">{fit}</span>
           <div className="flex items-center gap-0.5">
-            <ProfileLink candidate={c} iconOnly className="rounded-full p-1 text-ink-300 hover:text-ink-900" />
+            <ProfileLink candidate={c} iconOnly className="rounded-full p-1 text-ink-400 hover:text-ink-900" />
             <button
-              className="rounded-full p-1 text-ink-300 hover:text-ink-900"
+              className="rounded-full p-1 text-ink-400 hover:text-ink-900"
               onClick={() => onDraft(c)}
               aria-label={`Contact ${c.name}`}
               title="Contact"

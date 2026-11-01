@@ -137,7 +137,7 @@ export function CandidatesPage() {
           }
         />
       ) : (
-        <>
+        <div data-tour="candidates-list">
           {/* Mobile: cards */}
           <ul className="space-y-2 md:hidden">
             {rows.map((r) => {
@@ -209,7 +209,7 @@ export function CandidatesPage() {
                       <td className="py-4 pr-3">
                         <div className="flex items-center gap-1.5">
                           <span className="whitespace-nowrap font-medium text-ink-900">{r.candidate.name}</span>
-                          <ProfileLink candidate={r.candidate} iconOnly className="rounded-full p-0.5 text-ink-300 hover:text-ink-900" />
+                          <ProfileLink candidate={r.candidate} iconOnly className="rounded-full p-0.5 text-ink-400 hover:text-ink-900" />
                           {r.mustHaves.flagged && <FlagChip label="Must-have" />}
                         </div>
                         {r.needsMoreEvidence && <NeedsEvidence />}
@@ -229,7 +229,7 @@ export function CandidatesPage() {
           <div className="mt-4 flex justify-end">
             <HowCalculated align="right" />
           </div>
-        </>
+        </div>
       )}
 
       <CandidatePanel role={role} ranked={selected} onClose={() => setSelectedId(null)} />

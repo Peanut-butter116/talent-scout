@@ -39,6 +39,12 @@ export function AppStateProvider({ children, initial }: { children: ReactNode; i
 
   const resetDemo = useCallback(() => {
     clearRankMemory();
+    // Also forget per-tab extras: tour position and in-progress CEO review sessions.
+    try {
+      for (const k of Object.keys(sessionStorage)) if (k.startsWith('talent-scout:')) sessionStorage.removeItem(k);
+    } catch {
+      // ignore
+    }
     dispatch({ type: 'RESET' });
   }, []);
   const value = useMemo(() => ({ state, dispatch, resetDemo }), [state, resetDemo]);

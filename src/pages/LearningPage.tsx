@@ -357,7 +357,7 @@ function WeightMove({
       <div>
         <div className="text-sm text-ink-500">{label}</div>
         <div className="text-2xl font-semibold tabular-nums text-ink-900">
-          {from} <span className="text-ink-300">→</span> {to}
+          {from} <span className="text-ink-400">→</span> {to}
         </div>
       </div>
     </div>
