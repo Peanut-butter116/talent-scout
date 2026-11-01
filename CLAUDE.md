@@ -19,8 +19,10 @@ Design for clarity and speed, not feature count.
 - Vite + React + TypeScript, Tailwind CSS, lucide-react icons, Vitest for tests.
 - Static single-page app deployed on Vercel. Add a vercel.json rewrite so every
   route serves index.html (deep links and refresh must not 404).
-- No backend, no database, no API keys, no network calls, no real email, no scraping,
-  no analytics.
+- No backend, no database, no API keys, no real email, no scraping, no analytics.
+- Network calls: the ONLY ones allowed are (a) downloading the on-device embedding
+  model files for evidence extraction (see SOURCING), and (b) opening LinkedIn search
+  links in a new tab when the user clicks. Profile text is never sent anywhere.
 - All state in one React context + reducer, persisted to localStorage under a single
   versioned key. Each visitor's edits stay private to their browser.
   resetDemo() restores the seed data.
@@ -35,7 +37,13 @@ Design for clarity and speed, not feature count.
 - Every page shows a small badge: "Interactive demo · fictional candidates".
 - Footer/About: "Unofficial concept demo — not a Glot product. Roles are based on
   Glot's public job ads; all candidates and activity are fictional."
-- Never imply simulated analysis is live AI.
+- Never imply simulated analysis is live AI. The on-device matching model is labelled
+  "Suggested by an on-device matching model — please check."; the hypothesis analysis
+  is simple transparent rules.
+- Real LinkedIn profiles are never scraped, fetched or stored by the app (LinkedIn
+  terms + UK GDPR). Profiles a user pastes in stay in their localStorage only, can be
+  deleted per candidate, and are cleared by Reset. No automated LinkedIn fetching or
+  login.
 
 # ROLES (from Glot's public job ads)
 Glot-wide qualities appear in every role, marked with a "Glot-wide quality" badge:
@@ -45,7 +53,8 @@ Glot-wide qualities appear in every role, marked with a "Glot-wide quality" badg
 - Low ego: here to build, not to be seen building; changes mind when reasoning is sound.
 
 Each role has a one-line summary (paraphrased, shown on the Roles page), weighted
-criteria summing to 100, and optional must-have checks.
+criteria summing to 100, and optional must-have checks. Each criterion also has a
+one-line description and 3–5 example phrases (used by evidence extraction).
 
 1. Founding AI Engineer — owns AI direction and model architecture; sits on the
    senior leadership committee.
@@ -108,11 +117,15 @@ strong builder evidence.
   over present criteria), shown 0–100%.
 - Evidence coverage = share of total weight that has evidence (e.g. "70% of weight
   evidenced, 4 of 6 criteria").
-- Confidence: High (coverage ≥ 80% and mostly strong evidence), Medium, Low.
+- Confidence is a transparent, unit-tested formula:
+  coverage (share of weight evidenced) × quality (strong vs weak evidence) ×
+  verification (confirmed by a human, and later by a coffee chat) → 0–100 and a
+  High/Medium/Low label. A "How is this calculated?" popover explains it in plain
+  English.
 - Missing evidence must NEVER lower the fit score. It lowers confidence only.
 
 # PAGES
-Sidebar: Roles & Criteria, Candidates, Pipeline, Learning. KPI strip on Pipeline.
+Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip on Pipeline.
 
 1. Roles & Criteria
    - Role selector; role summary; criteria list with weight sliders that always keep
@@ -128,9 +141,13 @@ Sidebar: Roles & Criteria, Candidates, Pipeline, Learning. KPI strip on Pipeline
      coverage, confidence, source, status.
    - Filters: minimum fit, confidence, source.
    - Click a row → side panel: per-criterion evidence (strong/weak/missing), what's
-     uncertain, must-have checks, and "Add to shortlist".
+     uncertain, must-have checks, and "Add to shortlist". Per criterion also show the
+     matched sentence, match strength, and who confirmed it. Pasted-in candidates
+     have a Delete button.
 
 3. Pipeline
+   - "Quick review" card stack at the top (see QUICK REVIEW below); the kanban board
+     stays below for tracking after review.
    - Columns: Suggested → Approved → Contacted → Chat booked → Chat done, plus Skipped.
    - "Generate this week's shortlist" puts the top 5 not-yet-contacted candidates for
      the selected role (or all roles) into Suggested.
@@ -160,6 +177,7 @@ Sidebar: Roles & Criteria, Candidates, Pipeline, Learning. KPI strip on Pipeline
      Not supported. Show plainly: "Small samples — indicative only; a human decides."
    - "Profiles vs chats" callout: criteria where profiles consistently overstated
      what showed up in chats.
+   - Skip-reason counts per role (from Quick review) shown as a rubric signal.
    - Suggested rubric change for the selected role, e.g. "Lower High-bar background
      10 → 5, raise Builder 10 → 15", with a one-line reason. Accept / Dismiss.
      Accept updates weights, logs to Weight history, and Candidates re-rank.
@@ -171,22 +189,72 @@ Sidebar: Roles & Criteria, Candidates, Pipeline, Learning. KPI strip on Pipeline
 - First-visit welcome modal: what this is, fictional data, edits stay in your browser.
   Buttons: "Take the 2-minute tour" / "Explore on my own".
 - Guided tour (custom, lightweight): 1) change a weight on Founding AI Engineer →
-  2) see Candidates re-rank → 3) generate & approve shortlist → 4) log a coffee chat
-  → 5) accept the suggested rubric change → done.
+  2) see Candidates re-rank → 3) try an example profile on Sourcing → 4) generate &
+  approve shortlist → 5) log a coffee chat → 6) accept the suggested rubric change →
+  done.
 - Reset Demo button in the sidebar (with confirm). About this project section.
 - Friendly empty states everywhere.
+
+# SOURCING (LinkedIn, assisted — not automated)
+The app helps the user search LinkedIn themselves and turns profiles they choose into
+structured evidence, entirely in their browser.
+- Page "Sourcing" (second in sidebar).
+- Search builder: for the selected role, generate editable LinkedIn Boolean search
+  strings from the criteria (titles, keywords, synonyms) in three variants: Broad,
+  Precise, Unconventional builders. Buttons: Copy, and Open in LinkedIn (opens
+  https://www.linkedin.com/search/results/people/?keywords=<encoded> in a new tab).
+  Save searches; for each saved search track profiles added, shortlisted, chats,
+  progressed.
+- Add a profile: textarea to paste a LinkedIn profile or CV text, optional profile
+  URL, source = LinkedIn direct. Runs evidence extraction, shows suggested evidence
+  per criterion, user confirms/edits, then saves as a candidate.
+- "Try an example": 3 fictional sample profile texts so reviewers can test without
+  real data.
+- Page notice: "Profiles you add stay in this browser. Nothing is uploaded."
+- Seeded fictional candidates stay (labelled) so the demo works on first load.
+
+# EVIDENCE EXTRACTION
+- transformers.js (@huggingface/transformers) with a small quantized sentence-
+  embedding model (Xenova/all-MiniLM-L6-v2) in the browser, lazy-loaded only when the
+  user adds a profile, with a loading state. If it fails to load, fall back to
+  keyword matching. Only model files are downloaded; profile text never leaves the
+  browser.
+- Split pasted text into sentences; for each criterion find the best-matching
+  sentences by cosine similarity against its description + example phrases.
+- Similarity → suggested evidence: high = strong, middle = weak, low = missing
+  (thresholds tuned on the example profiles). Note = matched sentence, shortened.
+  Suggested 0–5 rating from similarity plus simple signals (quantified results;
+  built/shipped/led verbs). User must confirm or edit before saving.
+
+# QUICK REVIEW (Pipeline card stack)
+- "Review this week's shortlist" opens a card stack, one candidate per card.
+- Card front: name, headline, fit score, confidence, top 3 evidence lines, biggest
+  uncertainty. Tap to flip for full evidence.
+- Swipe right = Approve, left = Skip, star button / swipe up = Priority ("CEO wants
+  to meet personally"). Buttons under the card and keyboard arrows do the same.
+  Pointer events; smooth drag with slight rotation and an approve/skip hint overlay;
+  works on mobile and desktop.
+- Undo last decision.
+- Skip asks for one quick reason chip: Not enough evidence / Wrong seniority /
+  Missing key skill / Other. Reasons are stored.
+- Weekly cap of 10 cards, then a "Done for this week" summary screen.
+- A short "It's a match" moment when an approved candidate moves to Replied or
+  Chat booked.
+- Professional tone: never use the words "dating" or "Tinder" in the UI.
 
 # PHASES
 Work one phase at a time. After each phase: run tests and `npm run build`, commit,
 push, give me a 3-line summary of what to check in the preview, then STOP and wait
 for me to say "continue".
-- Phase 1: Save CLAUDE.md. Scaffold app, layout, routing, vercel.json, seed data
+- Phase 1 (done): Save CLAUDE.md. Scaffold app, layout, routing, vercel.json, seed data
   (roles + candidates + seeded chats), scoring + analysis functions with Vitest tests
   (weights re-rank correctly; missing evidence never lowers fit; must-have Unknown
   never excludes; reset restores seed; hypothesis labels behave on seeded data).
-- Phase 2: Roles & Criteria page and Candidates page.
-- Phase 3: Pipeline page.
-- Phase 4: Learning page.
-- Phase 5: Welcome modal, tour, Reset, About, empty states, mobile pass, then a full
-  end-to-end audit of every interaction. Fix bugs. Confirm no real names, keys or
-  network calls. Final test + build.
+- Phase 2 (done): Roles & Criteria page and Candidates page.
+- Phase 3: Pipeline page, including Quick review.
+- Phase 4: Learning page (also skip-reason counts per role as a rubric signal).
+- Phase 5: Sourcing page, evidence extraction and transparent confidence.
+- Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,
+  About, empty states, mobile pass, then a full end-to-end audit of every
+  interaction. Fix bugs. Confirm no real names, keys or unexpected network calls.
+  Final test + build.

@@ -4,10 +4,12 @@ import {
   type Candidate,
   type ChatFeedback,
   type PipelineStatus,
+  type ReviewEntry,
   type Role,
+  type SkipReason,
   type SourceChannel,
 } from '../types';
-import { rankCandidates, strongestEvidence } from './scoring';
+import { rankCandidates, strongestEvidence, type RankedCandidate } from './scoring';
 
 export const PIPELINE_COLUMNS: { status: PipelineStatus; label: string }[] = [
   { status: 'suggested', label: 'Suggested' },
@@ -30,6 +32,10 @@ export const STATUS_LABEL: Record<PipelineStatus, string> = {
 
 const CONTACTED: PipelineStatus[] = ['contacted', 'booked', 'done'];
 const REPLIED: PipelineStatus[] = ['booked', 'done'];
+
+export function hasReplied(c: Candidate): boolean {
+  return REPLIED.includes(c.status) || (c.status === 'contacted' && Boolean(c.replied));
+}
 
 export const SHORTLIST_SIZE = 5;
 
@@ -74,7 +80,7 @@ export interface Kpis {
 export function computeKpis(candidates: Candidate[], now = new Date()): Kpis {
   const weekStart = startOfWeek(now).getTime();
   const contacted = candidates.filter((c) => CONTACTED.includes(c.status)).length;
-  const replied = candidates.filter((c) => REPLIED.includes(c.status)).length;
+  const replied = candidates.filter(hasReplied).length;
   return {
     shortlistedThisWeek: candidates.filter(
       (c) => c.shortlistedAt && new Date(c.shortlistedAt).getTime() >= weekStart,
@@ -104,7 +110,7 @@ export function resultsBySource(candidates: Candidate[], chats: ChatFeedback[]):
     return {
       source,
       contacted: group.filter((c) => CONTACTED.includes(c.status)).length,
-      replied: group.filter((c) => REPLIED.includes(c.status)).length,
+      replied: group.filter(hasReplied).length,
       chats: group.filter((c) => c.status === 'done').length,
       progressed: group.filter((c) => progressedIds.has(c.id)).length,
     };
@@ -114,7 +120,11 @@ export function resultsBySource(candidates: Candidate[], chats: ChatFeedback[]):
 /** Editable outreach template referencing the candidate's strongest evidence. Never sent. */
 export function draftOutreach(candidate: Candidate, role: Role): string {
   const first = candidate.name.split(' ')[0];
-  const hooks = strongestEvidence(candidate, role).map((x) => lowerFirst(x.evidence.note));
+  // Only quote strong evidence — weak notes ("no project shown") make poor hooks.
+  const hooks = strongestEvidence(candidate, role, 3)
+    .filter((x) => x.evidence.strength === 'strong')
+    .slice(0, 2)
+    .map((x) => lowerFirst(x.evidence.note));
   const hookLine = hooks.length
     ? `I came across your work — ${hooks.join(', and ')} — and it stood out.`
     : `I came across your profile and your background stood out.`;
@@ -134,4 +144,61 @@ function lowerFirst(s: string): string {
   // Keep acronyms/proper nouns like "ASR" or "Go" intact.
   if (/^[A-Z]{2}/.test(s)) return s;
   return s.charAt(0).toLowerCase() + s.slice(1);
+}
+
+// ───────────────────────── Quick review ─────────────────────────
+
+export const REVIEW_WEEKLY_CAP = 10;
+
+export function reviewsThisWeek(log: ReviewEntry[], now = new Date()): ReviewEntry[] {
+  const weekStart = startOfWeek(now).getTime();
+  return log.filter((e) => new Date(e.at).getTime() >= weekStart);
+}
+
+/**
+ * Cards to review: Suggested candidates (in scope), best fit first, limited by what's left
+ * of this week's cap.
+ */
+export function reviewDeck(
+  candidates: Candidate[],
+  roles: Role[],
+  roleId: string | null,
+  log: ReviewEntry[],
+  now = new Date(),
+): RankedCandidate[] {
+  const remaining = Math.max(0, REVIEW_WEEKLY_CAP - reviewsThisWeek(log, now).length);
+  return roles
+    .filter((r) => roleId === null || r.id === roleId)
+    .flatMap((r) => rankCandidates(candidates, r))
+    .filter((r) => r.candidate.status === 'suggested')
+    .sort((a, b) => (b.score.fit ?? -1) - (a.score.fit ?? -1))
+    .slice(0, remaining);
+}
+
+/** The highest-weight criterion with no evidence, else the highest-weight weak one. */
+export function biggestUncertainty(candidate: Candidate, role: Role): string | null {
+  const byWeight = [...role.criteria].sort((a, b) => b.weight - a.weight);
+  const missing = byWeight.find((c) => !candidate.evidence[c.id]);
+  if (missing) return `No evidence yet for “${missing.name}”`;
+  const weak = byWeight.find((c) => candidate.evidence[c.id]?.strength === 'weak');
+  if (weak) return `Only weak evidence for “${weak.name}”`;
+  return null;
+}
+
+export function skipReasonCounts(
+  candidates: Candidate[],
+  roleId: string | null,
+): Record<SkipReason, number> {
+  const counts: Record<SkipReason, number> = {
+    not_enough_evidence: 0,
+    wrong_seniority: 0,
+    missing_skill: 0,
+    other: 0,
+  };
+  for (const c of candidates) {
+    if (c.status === 'skipped' && c.skipReason && (roleId === null || c.roleId === roleId)) {
+      counts[c.skipReason] += 1;
+    }
+  }
+  return counts;
 }

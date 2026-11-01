@@ -70,6 +70,33 @@ export interface Candidate {
   status: PipelineStatus;
   shortlistedAt?: string;
   contactedAt?: string;
+  /** Set from Quick review: the CEO wants to meet this person personally. */
+  priority?: boolean;
+  /** Candidate replied to outreach (while in Contacted). Booked/done imply replied. */
+  replied?: boolean;
+  skipReason?: SkipReason;
+}
+
+export type SkipReason = 'not_enough_evidence' | 'wrong_seniority' | 'missing_skill' | 'other';
+
+export const SKIP_REASONS: { id: SkipReason; label: string }[] = [
+  { id: 'not_enough_evidence', label: 'Not enough evidence' },
+  { id: 'wrong_seniority', label: 'Wrong seniority' },
+  { id: 'missing_skill', label: 'Missing key skill' },
+  { id: 'other', label: 'Other' },
+];
+
+export type ReviewDecision = 'approve' | 'skip' | 'priority';
+
+/** One Quick review decision. Holds the previous values so it can be undone. */
+export interface ReviewEntry {
+  id: string;
+  candidateId: string;
+  roleId: string;
+  decision: ReviewDecision;
+  reason?: SkipReason;
+  at: string;
+  prev: { status: PipelineStatus; priority?: boolean; skipReason?: SkipReason };
 }
 
 export type ChatOutcome = 'progress' | 'maybe' | 'not_fit';
