@@ -59,7 +59,9 @@ Every criterion is a **hypothesis**: "people with this background turn out to be
 - **Fit** is the weighted average of the ratings we have. A criterion with no evidence is left out — never counted as zero — because "not checked" isn't "can't".
 - **Cautious fit** is what we rank by. It treats the unknown part of a profile as neutral (50), so a thin profile with two great ratings can't jump to the top. With full evidence, cautious fit equals fit:
   `cautious fit = coverage × fit + (1 − coverage) × 50`
-- **Confidence** says how much to trust a score — how much of the profile is evidenced, and how strongly — not how good the person is.
+- **Confidence** says how much to trust a score — not how good the person is:
+  `confidence = coverage × quality × verification` (strong evidence 1, weak 0.6; confirmed by a person 0.85, also seen in a coffee chat 1). High ≥ 65, Medium ≥ 40.
+- **Evidence matching** (Sourcing): pasted text is split into sentences; each is compared with every criterion's description and example phrases using sentence embeddings and cosine similarity, mixed 70/30 with keyword overlap. Strong ≥ 0.5, weak ≥ 0.35, otherwise missing. A person confirms every line.
 
 The app's **How it works** page (`/how-it-works`) has the formulas and a live worked example.
 
@@ -99,7 +101,12 @@ The app's **How it works** page (`/how-it-works`) has the formulas and a live wo
 3. Accept or dismiss the suggested weight change.
 
 ### Sourcing
-1. Coming next: LinkedIn search builder and profile matching.
+1. Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.
+2. **Open in LinkedIn** runs the search in a new tab — you browse LinkedIn yourself. **Save** keeps the search.
+3. Paste a profile or CV you like (or **Try an example**), add the profile link if you have it, and choose **Match evidence**.
+4. An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.
+5. **Confirm & save** adds the person to Candidates, ranked like everyone else. **Delete** removes them.
+6. Saved searches show how many people each search found, shortlisted, met and progressed.
 
 ### Reset demo
 1. **Reset demo** (bottom of the sidebar) restores the original data.
@@ -118,7 +125,7 @@ The app's **How it works** page (`/how-it-works`) has the formulas and a live wo
 - Share links contain IDs only — never names or evidence.
 - No protected characteristics (photos, age, gender, nationality) are stored or used.
 - Scores support a human decision; they never make one. Nobody is contacted or rejected automatically.
-- No automated LinkedIn access, scraping or login.
+- No automated LinkedIn access, scraping or login. Profiles you paste are matched on your device; only the lines you confirm are kept, in your browser, until you delete them or reset.
 
 ## 8. Limits, and what a real version needs
 
@@ -132,7 +139,9 @@ This is a demo: data lives in one browser and samples are tiny. A real version w
 
 ## 9. Built with
 
-React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Developed with Claude Code.
+React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Evidence matching uses Transformers.js with the [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) sentence-embedding model ([browser version](https://huggingface.co/Xenova/all-MiniLM-L6-v2)), running in the browser. Developed with Claude Code.
+
+The quantized model files live in `public/models/` (served from this site; no requests to Hugging Face at runtime). `npm run fetch-model` re-downloads them and checks the SHA-256 Hugging Face publishes. The ONNX runtime files are copied into `public/ort/` before every build.
 
 ```bash
 npm install

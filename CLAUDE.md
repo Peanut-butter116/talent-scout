@@ -28,7 +28,7 @@ Design for clarity and speed, not feature count.
 - All state in one React context + reducer, persisted to localStorage under a single
   versioned key. Each visitor's edits stay private to their browser.
   resetDemo() restores the seed data. Whenever the saved-state shape changes, bump the
-  version and storage key (currently v5) so old saved state resets cleanly.
+  version and storage key (currently v6) so old saved state resets cleanly.
 - Keep code modular: /src/data (seed), /src/lib (scoring, analysis — pure functions
   with tests), /src/state, /src/pages, /src/components.
 
@@ -117,7 +117,7 @@ Must-have checks are Yes / No / Unknown. "Unknown" never excludes a candidate; i
 shows "Check at first call". Only an explicit "No" flags them.
 
 # CANDIDATES
-7–9 fictional candidates per role (41 total) so every role can fill a shortlist of 5
+7–9 fictional candidates per role (40 total) so every role can fill a shortlist of 5
 new candidates. Each has: name, headline, current
 fictional employer, role applied to, sourcing channel (LinkedIn direct / Network
 referral / Agency / Inbound), and per-criterion evidence that is EITHER
@@ -145,9 +145,10 @@ than agency (agency ~1 of 5–6 progressed). Every percentage shows its n, e.g.
 - Evidence coverage = share of total weight that has evidence (e.g. "70% of weight
   evidenced, 4 of 6 criteria").
 - Confidence is a transparent, unit-tested formula:
-  coverage (share of weight evidenced) × quality (strong vs weak evidence) ×
-  verification (confirmed by a human, and later by a coffee chat) → 0–100 and a
-  High/Medium/Low label. A "How is this calculated?" popover explains it in plain
+  coverage (share of weight evidenced) × quality (strong 1, weak 0.6, weight-averaged) ×
+  verification (confirmed by a person 0.85, also seen in a coffee chat 1, weight-averaged)
+  → 0–100; High ≥ 65, Medium ≥ 40, Low below. All saved evidence is person-confirmed
+  (demo data or "you"); `checkedInChat` is set on evidence a logged chat also rated. A "How is this calculated?" popover explains it in plain
   English.
 - Missing evidence must NEVER lower the fit score. It lowers confidence only.
 - Ranking uses CAUTIOUS FIT: coverage × fit + (1 − coverage) × 50 — unknowns shrink
@@ -326,15 +327,24 @@ structured evidence, entirely in their browser.
 - Seeded fictional candidates stay (labelled) so the demo works on first load.
 
 # EVIDENCE EXTRACTION
-- transformers.js (@huggingface/transformers) with a small quantized sentence-
-  embedding model (Xenova/all-MiniLM-L6-v2) in the browser, lazy-loaded only when the
-  user adds a profile, with a loading state. If it fails to load, fall back to
-  keyword matching. Only model files are downloaded; profile text never leaves the
-  browser.
+- transformers.js (@huggingface/transformers 3.7.5) with the quantized
+  Xenova/all-MiniLM-L6-v2 model, SELF-HOSTED: model files in /public/models/Xenova/
+  all-MiniLM-L6-v2/ (onnx/model_quantized.onnx, SHA-256 afdb6f1a…48bdb1, verified against
+  Hugging Face's published hash) and the ONNX runtime wasm in /public/ort/ (copied from
+  node_modules by scripts/copy-ort.mjs before dev/build; git-ignored). transformers.js is
+  configured with allowRemoteModels = false, localModelPath = /models/, wasmPaths = /ort/:
+  no requests to Hugging Face or any CDN at runtime. `npm run fetch-model` re-downloads
+  the model from Hugging Face (needs huggingface.co + *.hf.co) and checks hashes.
+- Lazy: the Sourcing route is code-split, and transformers.js is dynamically imported
+  only when someone first clicks "Match evidence" or "Try an example" (loading state
+  shown). Other pages never load it. If it fails, keyword matching is used and labelled.
+- Only the confirmed evidence lines are stored (in localStorage); raw pasted text is not.
 - Split pasted text into sentences; for each criterion find the best-matching
   sentences by cosine similarity against its description + example phrases.
-- Similarity → suggested evidence: high = strong, middle = weak, low = missing
-  (thresholds tuned on the example profiles). Note = matched sentence, shortened.
+- Score per sentence = 0.7 × best cosine similarity (over the criterion's description
+  and example phrases) + 0.3 × keyword overlap. Strong ≥ 0.5, weak ≥ 0.35, else missing
+  (tuned on the 3 example profiles with scripts/tune.mts). Keyword fallback: strong ≥ 0.6,
+  weak ≥ 0.45. Rating = 3 (strong) / 2 (weak), +1 doing verb, +1 number, max 5. Note = matched sentence, shortened.
   Suggested 0–5 rating from similarity plus simple signals (quantified results;
   built/shipped/led verbs). User must confirm or edit before saving.
 
@@ -368,7 +378,8 @@ for me to say "continue".
 - Phase 4 (done): Learning page (also skip-reason counts per role as a rubric signal).
   Follow-up done: calm restyle + copy cut, CEO /review share links, neutral-50 cautious fit,
   glot.com-matched style, Glot logo, credit line, README-style About, 41 candidates.
-- Phase 5: Sourcing page, evidence extraction and transparent confidence.
+- Phase 5 (done): Sourcing page, self-hosted on-device evidence extraction with keyword
+  fallback, transparent confidence formula, How it works §8, About/README Sourcing steps.
 - Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,
   About, empty states, mobile pass, then a full end-to-end audit of every
   interaction. Fix bugs. Confirm no real names, keys or unexpected network calls.

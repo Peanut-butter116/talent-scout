@@ -3,6 +3,7 @@ import { SEED_CHATS } from '../data/chats';
 import { SEED_ROLES } from '../data/roles';
 import type { RubricSuggestion } from '../lib/analysis';
 import { pickShortlist } from '../lib/pipeline';
+import { applyChatChecks } from '../lib/scoring';
 import { planImport, type ResultsLink } from '../lib/share';
 import { addCriterion, applyWeightChanges, removeCriterion, setWeight } from '../lib/weights';
 import type {
@@ -13,13 +14,14 @@ import type {
   ReviewDecision,
   ReviewEntry,
   Role,
+  SavedSearch,
   SkipReason,
   WeightChange,
 } from '../types';
 
 /** Bump both whenever the saved-state shape changes, so old saved state resets cleanly. */
-export const STATE_VERSION = 5;
-export const STORAGE_KEY = 'talent-scout:v5';
+export const STATE_VERSION = 6;
+export const STORAGE_KEY = 'talent-scout:v6';
 
 export interface AppState {
   version: number;
@@ -29,6 +31,7 @@ export interface AppState {
   weightHistory: WeightChange[];
   dismissedSuggestions: string[];
   reviewLog: ReviewEntry[];
+  savedSearches: SavedSearch[];
   selectedRoleId: string;
   welcomeSeen: boolean;
 }
@@ -39,11 +42,12 @@ export function createSeedState(): AppState {
   return {
     version: STATE_VERSION,
     roles: deepCopy(SEED_ROLES),
-    candidates: deepCopy(SEED_CANDIDATES),
+    candidates: applyChatChecks(deepCopy(SEED_CANDIDATES), SEED_CHATS),
     chats: deepCopy(SEED_CHATS),
     weightHistory: [],
     dismissedSuggestions: [],
     reviewLog: [],
+    savedSearches: [],
     selectedRoleId: SEED_ROLES[0].id,
     welcomeSeen: false,
   };
@@ -74,6 +78,10 @@ export type Action =
     }
   | { type: 'UNDO_REVIEW' }
   | { type: 'IMPORT_DECISIONS'; results: ResultsLink; at?: string }
+  | { type: 'ADD_CANDIDATE'; candidate: Candidate }
+  | { type: 'DELETE_CANDIDATE'; candidateId: string }
+  | { type: 'SAVE_SEARCH'; search: SavedSearch }
+  | { type: 'DELETE_SEARCH'; searchId: string }
   | { type: 'HYDRATE'; state: AppState }
   | { type: 'SET_REPLIED'; candidateId: string; replied: boolean }
   | { type: 'SET_MUST_HAVE_VALUE'; candidateId: string; mustHaveId: string; value: MustHaveValue }
@@ -311,16 +319,38 @@ export function reducer(state: AppState, action: Action): AppState {
         ),
       };
 
-    case 'LOG_CHAT':
+    case 'LOG_CHAT': {
+      const chats = [...state.chats.filter((c) => c.candidateId !== action.chat.candidateId), action.chat];
+      const candidates = state.candidates.map((c) =>
+        c.id === action.chat.candidateId ? { ...c, status: 'done' as const } : c,
+      );
+      return { ...state, chats, candidates: applyChatChecks(candidates, chats) };
+    }
+
+    case 'ADD_CANDIDATE':
+      if (state.candidates.some((c) => c.id === action.candidate.id)) return state;
+      return { ...state, candidates: [...state.candidates, action.candidate] };
+
+    case 'DELETE_CANDIDATE': {
+      const target = state.candidates.find((c) => c.id === action.candidateId);
+      // Only profiles a person added can be deleted; seeded demo candidates stay.
+      if (!target || target.addedBy !== 'you') return state;
       return {
         ...state,
-        chats: [
-          ...state.chats.filter((c) => c.candidateId !== action.chat.candidateId),
-          action.chat,
-        ],
-        candidates: state.candidates.map((c) =>
-          c.id === action.chat.candidateId ? { ...c, status: 'done' } : c,
-        ),
+        candidates: state.candidates.filter((c) => c.id !== action.candidateId),
+        chats: state.chats.filter((c) => c.candidateId !== action.candidateId),
+        reviewLog: state.reviewLog.filter((e) => e.candidateId !== action.candidateId),
+      };
+    }
+
+    case 'SAVE_SEARCH':
+      return { ...state, savedSearches: [action.search, ...state.savedSearches.filter((x) => x.id !== action.search.id)] };
+
+    case 'DELETE_SEARCH':
+      return {
+        ...state,
+        savedSearches: state.savedSearches.filter((x) => x.id !== action.searchId),
+        candidates: state.candidates.map((c) => (c.searchId === action.searchId ? { ...c, searchId: undefined } : c)),
       };
 
     case 'ACCEPT_SUGGESTION': {

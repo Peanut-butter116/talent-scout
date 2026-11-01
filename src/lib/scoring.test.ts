@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SEED_CANDIDATES } from '../data/candidates';
 import { SEED_ROLES } from '../data/roles';
 import type { Candidate, Role } from '../types';
-import { cautiousFit, checkMustHaves, confidenceFor, NEUTRAL_FIT, rankCandidates, scoreCandidate } from './scoring';
+import { cautiousFit, checkMustHaves, confidenceLabel, confidenceScoreFor, NEUTRAL_FIT, rankCandidates, scoreCandidate } from './scoring';
 import { setWeight } from './weights';
 
 const role: Role = {
@@ -90,11 +90,37 @@ describe('scoreCandidate', () => {
 });
 
 describe('confidence', () => {
-  it('is High only with ≥80% coverage and mostly strong evidence', () => {
-    expect(confidenceFor(80, 0.6)).toBe('High');
-    expect(confidenceFor(79, 1)).toBe('Medium');
-    expect(confidenceFor(100, 0.5)).toBe('Medium');
-    expect(confidenceFor(40, 1)).toBe('Low');
+  it('is coverage × quality × verification on a 0–100 scale', () => {
+    expect(confidenceScoreFor(1, 1, 1)).toBe(100);
+    expect(confidenceScoreFor(0.5, 1, 1)).toBe(50);
+    expect(confidenceScoreFor(1, 0.6, 0.85)).toBe(51);
+    expect(confidenceScoreFor(0, 1, 1)).toBe(0);
+  });
+
+  it('labels: High ≥ 65, Medium ≥ 40, Low below', () => {
+    expect(confidenceLabel(65)).toBe('High');
+    expect(confidenceLabel(64.9)).toBe('Medium');
+    expect(confidenceLabel(40)).toBe('Medium');
+    expect(confidenceLabel(39.9)).toBe('Low');
+  });
+
+  it('strong evidence and coffee-chat checks raise confidence; weak evidence lowers it', () => {
+    const strong = cand('s', { a: { rating: 4, strength: 'strong', note: '' }, b: { rating: 4, strength: 'strong', note: '' }, c: { rating: 4, strength: 'strong', note: '' } });
+    const weak = cand('w', { a: { rating: 4, strength: 'weak', note: '' }, b: { rating: 4, strength: 'weak', note: '' }, c: { rating: 4, strength: 'weak', note: '' } });
+    const chat = cand('c', { a: { rating: 4, strength: 'strong', note: '', checkedInChat: true }, b: { rating: 4, strength: 'strong', note: '', checkedInChat: true }, c: { rating: 4, strength: 'strong', note: '', checkedInChat: true } });
+    const s = scoreCandidate(strong, role);
+    expect(s.quality).toBe(1);
+    expect(s.verification).toBeCloseTo(0.85);
+    expect(s.confidenceScore).toBe(85);
+    expect(scoreCandidate(weak, role).confidenceScore).toBe(51);
+    expect(scoreCandidate(chat, role).confidenceScore).toBe(100);
+    // Confidence never changes fit.
+    expect(scoreCandidate(weak, role).fit).toBeCloseTo(s.fit!);
+  });
+
+  it('missing evidence lowers confidence via coverage', () => {
+    const thin = cand('t', { a: { rating: 4, strength: 'strong', note: '' } });
+    expect(scoreCandidate(thin, role).confidenceScore).toBe(42.5);
   });
 });
 

@@ -20,6 +20,10 @@ export interface Criterion {
   theme?: CriterionTheme;
   /** Glot-wide qualities appear in every role. */
   glotWide?: boolean;
+  /** One-line description (used by evidence matching and as a hint). */
+  description?: string;
+  /** 3–5 example phrases that would count as evidence. */
+  examples?: string[];
 }
 
 export interface MustHave {
@@ -45,6 +49,12 @@ export interface Evidence {
   rating: number;
   strength: EvidenceStrength;
   note: string;
+  /** Who confirmed this rating. Missing = entered by a person in the demo data. */
+  confirmedBy?: 'demo' | 'you';
+  /** For evidence suggested from pasted text: the sentence it came from and how well it matched. */
+  match?: { sentence: string; similarity: number; method: 'model' | 'keywords' };
+  /** Also seen in a coffee chat (an observed rating was logged for this criterion). */
+  checkedInChat?: boolean;
 }
 
 export type MustHaveValue = 'yes' | 'no' | 'unknown';
@@ -84,6 +94,21 @@ export interface Candidate {
   profileUrl?: string;
   /** Free-text note for whoever reaches out, e.g. who referred them. */
   contactNote?: string;
+  /** Set when a person added this profile on the Sourcing page (stays in this browser only). */
+  addedBy?: 'you';
+  addedAt?: string;
+  /** Saved search the profile came from, for per-search results. */
+  searchId?: string;
+}
+
+export type SearchVariant = 'broad' | 'precise' | 'builders';
+
+export interface SavedSearch {
+  id: string;
+  roleId: string;
+  variant: SearchVariant;
+  query: string;
+  at: string;
 }
 
 export type SkipReason = 'not_enough_evidence' | 'wrong_seniority' | 'missing_skill' | 'other';

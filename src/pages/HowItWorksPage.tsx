@@ -8,7 +8,8 @@ import {
   MIN_GROUP_SIZE,
   MIN_SUGGESTED_WEIGHT,
 } from '../lib/analysis';
-import { NEEDS_EVIDENCE_COVERAGE, NEUTRAL_FIT, rankCandidates } from '../lib/scoring';
+import { KEYWORD_THRESHOLDS, MODEL_MIX, MODEL_THRESHOLDS } from '../lib/extract';
+import { CONFIDENCE_BANDS, NEEDS_EVIDENCE_COVERAGE, NEUTRAL_FIT, QUALITY_WEIGHT, rankCandidates, VERIFICATION_WEIGHT } from '../lib/scoring';
 import { setWeight } from '../lib/weights';
 import { useAppState } from '../state/AppState';
 import type { Criterion } from '../types';
@@ -83,7 +84,13 @@ export function HowItWorksPage() {
 
       <Section n={5} id="confidence" title="Confidence">
         <p>How much to trust the score — not how good the person is.</p>
-        <p className="mt-2 text-ink-500">High: ≥ 80% evidenced, mostly strong. Low: under half, or mostly weak.</p>
+        <Formula>confidence = coverage × quality × verification</Formula>
+        <ul className="space-y-1 text-ink-500">
+          <li>Coverage: share of the weight with evidence.</li>
+          <li>Quality: strong {QUALITY_WEIGHT.strong} · weak {QUALITY_WEIGHT.weak}.</li>
+          <li>Verification: confirmed by a person {VERIFICATION_WEIGHT.person} · also seen in a coffee chat {VERIFICATION_WEIGHT.chat}.</li>
+          <li>High ≥ {CONFIDENCE_BANDS.high} · Medium ≥ {CONFIDENCE_BANDS.medium} · Low below.</li>
+        </ul>
       </Section>
 
       <Section n={6} id="example" title="Try it">
@@ -105,7 +112,28 @@ export function HowItWorksPage() {
       </Section>
 
       <Section n={8} id="matching" title="Matching model">
-        <p className="text-ink-400">Coming in the Sourcing step.</p>
+        <p>When you paste a profile on Sourcing, a small model suggests evidence for each criterion. You confirm it.</p>
+        <ol className="mt-3 list-decimal space-y-1.5 pl-5">
+          <li>The text is split into sentences.</li>
+          <li>Each sentence becomes a list of numbers (a sentence embedding) that captures its meaning.</li>
+          <li>So does each criterion's description and example phrases.</li>
+          <li>Cosine similarity measures how close they are: 1 = same meaning, 0 = unrelated.</li>
+        </ol>
+        <Formula>
+          score = {MODEL_MIX.cosine} × best cosine + {MODEL_MIX.keywords} × keyword overlap
+        </Formula>
+        <p>
+          Strong ≥ {MODEL_THRESHOLDS.strong} · weak ≥ {MODEL_THRESHOLDS.weak} · below that, missing. The rating starts at 3
+          (strong) or 2 (weak), +1 for a doing verb (built, shipped, led), +1 for a number.
+        </p>
+        <p className="mt-3">
+          If the model can't load, keyword matching takes over (strong ≥ {KEYWORD_THRESHOLDS.strong}, weak ≥{' '}
+          {KEYWORD_THRESHOLDS.weak}).
+        </p>
+        <p className="mt-3 text-ink-500">
+          Runs entirely in your browser (all-MiniLM-L6-v2, quantized, ~23 MB, loaded once from this site). Nothing is
+          uploaded; only the lines you confirm are kept.
+        </p>
       </Section>
 
       <Section n={9} id="limits" title="Limits">

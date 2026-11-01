@@ -123,8 +123,14 @@ export function AboutPage() {
           equals fit.
         </p>
         <p>
-          <strong className="text-ink-900">Confidence</strong> says how much to trust a score — how much of the profile is
-          evidenced, and how strongly — not how good the person is.
+          <strong className="text-ink-900">Confidence</strong> says how much to trust a score — not how good the person is.
+          It multiplies how much of the profile is evidenced, how strong that evidence is, and whether a person (and later a
+          coffee chat) confirmed it.
+        </p>
+        <p>
+          <strong className="text-ink-900">Evidence matching</strong> (Sourcing) compares each sentence of a pasted profile
+          with each criterion's description and examples, using a small sentence-embedding model in your browser. It only
+          suggests; a person confirms every line.
         </p>
         <p>
           <HowItWorksLink label="Formulas and a live example" className="inline-flex items-center gap-1.5 font-medium text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900" />
@@ -165,8 +171,13 @@ export function AboutPage() {
           <li>Read the hypothesis check: which criteria are holding up, unclear or not supported.</li>
           <li>Accept or dismiss the suggested weight change.</li>
         </Manual>
-        <Manual title="Sourcing">
-          <li>Coming next: LinkedIn search builder and profile matching.</li>
+        <Manual title="Sourcing" to="/sourcing">
+          <li>Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.</li>
+          <li>Open in LinkedIn runs the search in a new tab — you browse LinkedIn yourself. Save keeps the search.</li>
+          <li>Paste a profile or CV you like (or Try an example), add the profile link if you have it, and choose Match evidence.</li>
+          <li>An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.</li>
+          <li>Confirm & save adds the person to Candidates, ranked like everyone else. Delete removes them.</li>
+          <li>Saved searches show how many people each search found, shortlisted, met and progressed.</li>
         </Manual>
         <Manual title="Reset demo">
           <li>Reset demo (bottom of the sidebar) restores the original data.</li>
@@ -189,7 +200,7 @@ export function AboutPage() {
           <li>Share links contain IDs only — never names or evidence.</li>
           <li>No protected characteristics (photos, age, gender, nationality) are stored or used.</li>
           <li>Scores support a human decision; they never make one. Nobody is contacted or rejected automatically.</li>
-          <li>No automated LinkedIn access, scraping or login.</li>
+          <li>No automated LinkedIn access, scraping or login. Profiles you paste are matched on your device; only the lines you confirm are kept, in your browser, until you delete them or reset.</li>
         </ul>
       </Section>
 
@@ -205,7 +216,10 @@ export function AboutPage() {
       </Section>
 
       <Section n={9} id="built" title="Built with">
-        <p>React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Developed with Claude Code.</p>
+        <p>
+          React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Evidence matching uses Transformers.js with the
+          all-MiniLM-L6-v2 sentence-embedding model, running in the browser. Developed with Claude Code.
+        </p>
       </Section>
 
       <Section n={10} id="contact" title="Contact">

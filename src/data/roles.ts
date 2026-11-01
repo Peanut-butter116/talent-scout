@@ -1,10 +1,11 @@
 import type { Role } from '../types';
+import { CRITERION_TEXT } from './criteriaText';
 
 /**
  * Roles are paraphrased from Glot's public job ads.
  * Weights in each role sum to 100.
  */
-export const SEED_ROLES: Role[] = [
+const ROLES: Role[] = [
   {
     id: 'ai-eng',
     jdUrl: 'https://jobs.ashbyhq.com/glot/f529d4cb-dec4-4db8-987b-acc64bec9782',
@@ -140,6 +141,12 @@ export const SEED_ROLES: Role[] = [
     mustHaves: [{ id: 'rtw', label: 'Right to work in UK', enabled: true }],
   },
 ];
+
+/** Roles with each criterion's description and example phrases attached. */
+export const SEED_ROLES: Role[] = ROLES.map((r) => ({
+  ...r,
+  criteria: r.criteria.map((c) => ({ ...c, ...CRITERION_TEXT[c.id] })),
+}));
 
 export const GLOT_WIDE_QUALITIES = [
   {

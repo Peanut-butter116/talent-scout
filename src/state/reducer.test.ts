@@ -4,6 +4,7 @@ import { SEED_CHATS } from '../data/chats';
 import { SEED_ROLES } from '../data/roles';
 import { analyzeRole, suggestRubricChange } from '../lib/analysis';
 import { totalWeight } from '../lib/weights';
+import { applyChatChecks } from '../lib/scoring';
 import { createSeedState, loadState, reducer, saveState, STORAGE_KEY, type AppState } from './reducer';
 
 const memStorage = () => {
@@ -41,7 +42,7 @@ describe('reset', () => {
   it('seed is not mutated by reducer actions', () => {
     mutate(createSeedState());
     expect(createSeedState().roles).toEqual(SEED_ROLES);
-    expect(createSeedState().candidates).toEqual(SEED_CANDIDATES);
+    expect(createSeedState().candidates).toEqual(applyChatChecks(SEED_CANDIDATES, SEED_CHATS));
     expect(createSeedState().chats).toEqual(SEED_CHATS);
   });
 });
