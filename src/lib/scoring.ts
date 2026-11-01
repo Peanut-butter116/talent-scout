@@ -11,8 +11,19 @@ export interface CandidateScore {
   totalCount: number;
   /** 0–1: share of evidenced weight backed by strong evidence. */
   strongShare: number;
+  /** 0–1: strong = 1, weak = 0.6, averaged over evidenced weight. */
+  quality: number;
+  /** 0–1: confirmed by a person = 0.85, also seen in a coffee chat = 1, averaged by weight. */
+  verification: number;
+  /** 0–100 = coverage × quality × verification. */
+  confidenceScore: number;
   confidence: Confidence;
 }
+
+/** Transparent confidence parts (see How it works). */
+export const QUALITY_WEIGHT = { strong: 1, weak: 0.6 } as const;
+export const VERIFICATION_WEIGHT = { person: 0.85, chat: 1 } as const;
+export const CONFIDENCE_BANDS = { high: 65, medium: 40 } as const;
 
 /**
  * Fit = weighted average over criteria WITH evidence only (weights re-normalised).
@@ -23,6 +34,8 @@ export function scoreCandidate(candidate: Candidate, role: Role): CandidateScore
   let evidencedWeight = 0;
   let weightedSum = 0;
   let strongWeight = 0;
+  let qualitySum = 0;
+  let verificationSum = 0;
   let evidencedCount = 0;
 
   for (const c of role.criteria) {
@@ -33,11 +46,17 @@ export function scoreCandidate(candidate: Candidate, role: Role): CandidateScore
     evidencedWeight += c.weight;
     weightedSum += c.weight * (clamp(e.rating, 0, 5) / 5);
     if (e.strength === 'strong') strongWeight += c.weight;
+    qualitySum += c.weight * QUALITY_WEIGHT[e.strength];
+    // Saved evidence is always confirmed by a person (demo data or "you"); a chat adds more.
+    verificationSum += c.weight * (e.checkedInChat ? VERIFICATION_WEIGHT.chat : VERIFICATION_WEIGHT.person);
   }
 
   const fit = evidencedWeight > 0 ? (weightedSum / evidencedWeight) * 100 : null;
   const coverage = totalWeight > 0 ? (evidencedWeight / totalWeight) * 100 : 0;
   const strongShare = evidencedWeight > 0 ? strongWeight / evidencedWeight : 0;
+  const quality = evidencedWeight > 0 ? qualitySum / evidencedWeight : 0;
+  const verification = evidencedWeight > 0 ? verificationSum / evidencedWeight : 0;
+  const confidenceScore = confidenceScoreFor(coverage / 100, quality, verification);
 
   return {
     fit,
@@ -45,14 +64,45 @@ export function scoreCandidate(candidate: Candidate, role: Role): CandidateScore
     evidencedCount,
     totalCount: role.criteria.length,
     strongShare,
-    confidence: confidenceFor(coverage, strongShare),
+    quality,
+    verification,
+    confidenceScore,
+    confidence: confidenceLabel(confidenceScore),
   };
 }
 
-export function confidenceFor(coverage: number, strongShare: number): Confidence {
-  if (coverage >= 80 && strongShare >= 0.6) return 'High';
-  if (coverage < 50 || strongShare < 0.3) return 'Low';
-  return 'Medium';
+/** coverage (0–1) × quality (0–1) × verification (0–1) → 0–100. */
+export function confidenceScoreFor(coverage: number, quality: number, verification: number): number {
+  return Math.round(clamp(coverage, 0, 1) * clamp(quality, 0, 1) * clamp(verification, 0, 1) * 1000) / 10;
+}
+
+export function confidenceLabel(score: number): Confidence {
+  if (score >= CONFIDENCE_BANDS.high) return 'High';
+  if (score >= CONFIDENCE_BANDS.medium) return 'Medium';
+  return 'Low';
+}
+
+/** Marks evidence that a logged coffee chat also rated (observed rating present). */
+export function applyChatChecks<T extends Candidate>(
+  candidates: T[],
+  chats: { candidateId: string; observed: Record<string, number | undefined> }[],
+): T[] {
+  const byCand = new Map(chats.map((c) => [c.candidateId, c]));
+  return candidates.map((c) => {
+    const chat = byCand.get(c.id);
+    let changed = false;
+    const evidence: Candidate['evidence'] = {};
+    for (const [k, e] of Object.entries(c.evidence)) {
+      if (!e) continue;
+      const checked = Boolean(chat && chat.observed[k] !== undefined);
+      if (Boolean(e.checkedInChat) !== checked) changed = true;
+      const next = { ...e };
+      if (checked) next.checkedInChat = true;
+      else delete next.checkedInChat;
+      evidence[k] = next;
+    }
+    return changed ? { ...c, evidence } : c;
+  });
 }
 
 export interface MustHaveCheck {

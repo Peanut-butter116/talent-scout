@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, ListPlus, PhoneCall } from 'lucide-react';
+import { AlertTriangle, ArrowRight, ListPlus, PhoneCall, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { STATUS_LABEL } from '../lib/pipeline';
@@ -23,6 +23,7 @@ export function CandidatePanel({
 }) {
   const { dispatch } = useAppState();
   const [contacting, setContacting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   if (!ranked) return null;
   const { candidate: c, score, mustHaves } = ranked;
   const { missing, weak } = uncertainties(c, role);
@@ -44,6 +45,7 @@ export function CandidatePanel({
           </p>
           <p className="mt-0.5 text-xs text-ink-400">
             #{ranked.rank} · {c.source}
+            {c.addedBy === 'you' && <span className="ml-1.5 font-medium text-ink-600">· Added by you</span>}
           </p>
           <div className="mt-3">
             <ProfileActions candidate={c} onContact={() => setContacting(true)} size="sm" />
@@ -128,10 +130,21 @@ export function CandidatePanel({
                   <StrengthChip strength={e ? e.strength : 'missing'} />
                 </div>
                 {e && (
-                  <div className="mt-1 flex items-start gap-2 text-sm text-ink-500">
-                    <span className="mt-1.5"><RatingDots rating={e.rating} /></span>
-                    <span>{e.note}</span>
-                  </div>
+                  <>
+                    <div className="mt-1 flex items-start gap-2 text-sm text-ink-500">
+                      <span className="mt-1.5"><RatingDots rating={e.rating} /></span>
+                      <span>{e.note}</span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-ink-400">
+                      {e.match && (
+                        <span title={`Matched sentence: “${e.match.sentence}”`}>
+                          {Math.round(e.match.similarity * 100)}% {e.match.method === 'model' ? 'model match' : 'keyword match'}
+                        </span>
+                      )}
+                      <span>{e.confirmedBy === 'you' ? 'Confirmed by you' : 'Entered by a person (demo data)'}</span>
+                      {e.checkedInChat && <span className="text-teal-700">Checked in a coffee chat</span>}
+                    </div>
+                  </>
                 )}
               </li>
             );
@@ -147,6 +160,29 @@ export function CandidatePanel({
               <li key={m.id}>· {m.name}</li>
             ))}
           </ul>
+        </section>
+      )}
+      {c.addedBy === 'you' && (
+        <section className="mt-8 border-t border-ink-100 pt-4">
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-ink-600">Delete this profile from your browser?</span>
+              <button
+                className="btn bg-rose-600 px-3 py-1.5 text-xs text-white hover:bg-rose-700"
+                onClick={() => {
+                  dispatch({ type: 'DELETE_CANDIDATE', candidateId: c.id });
+                  onClose();
+                }}
+              >
+                Delete
+              </button>
+              <button className="btn-ghost px-2 py-1.5 text-xs" onClick={() => setConfirmDelete(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button className="btn-ghost -ml-3 text-sm text-ink-500 hover:text-rose-600" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="h-4 w-4" /> Delete profile
+            </button>
+          )}
         </section>
       )}
       {contacting && <OutreachModal candidate={c} role={role} onClose={() => setContacting(false)} />}

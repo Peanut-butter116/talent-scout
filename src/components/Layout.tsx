@@ -1,4 +1,4 @@
-import { BarChart3, Info, KanbanSquare, ListChecks, Menu, RotateCcw, Users, X } from 'lucide-react';
+import { BarChart3, Info, KanbanSquare, ListChecks, Menu, RotateCcw, Search, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAppState } from '../state/AppState';
@@ -9,6 +9,7 @@ import { ImportDecisions } from './ImportDecisions';
 
 const NAV = [
   { to: '/roles', label: 'Roles & Criteria', icon: ListChecks },
+  { to: '/sourcing', label: 'Sourcing', icon: Search },
   { to: '/candidates', label: 'Candidates', icon: Users },
   { to: '/pipeline', label: 'Pipeline', icon: KanbanSquare },
   { to: '/learning', label: 'Learning', icon: BarChart3 },

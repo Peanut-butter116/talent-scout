@@ -12,7 +12,8 @@ export function HowCalculated({ align = 'left' }: { align?: 'left' | 'right' }) 
       <span className="block font-mono text-xs">coverage × fit + (1 − coverage) × {NEUTRAL_FIT}</span>
       <span className="block">Unknowns count as neutral. Under {NEEDS_EVIDENCE_COVERAGE}% coverage: find out more first.</span>
       <span className="mt-3 block font-medium text-ink-900">Confidence</span>
-      <span className="block">How much of the profile is evidenced, and how strongly.</span>
+      <span className="block font-mono text-xs">coverage × quality × verification</span>
+      <span className="block">How much is evidenced, how strongly, and whether a person or a chat confirmed it.</span>
       <span className="mt-3 block">
         <HowItWorksLink label="How it works" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900" />
       </span>
