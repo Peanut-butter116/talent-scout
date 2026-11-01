@@ -4,12 +4,6 @@ import { EmptyState } from '../components/EmptyState';
 
 export function NotFoundPage() {
   return (
-    <EmptyState
-      icon={Compass}
-      title="That page doesn't exist"
-      action={<Link className="btn-primary" to="/roles">Go to Roles & Criteria</Link>}
-    >
-      The link may be out of date.
-    </EmptyState>
+    <EmptyState icon={Compass} title="That page doesn't exist." action={<Link className="btn-primary" to="/roles">Go home</Link>} />
   );
 }

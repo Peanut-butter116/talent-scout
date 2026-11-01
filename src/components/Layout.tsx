@@ -1,8 +1,10 @@
-import { BarChart3, Info, KanbanSquare, ListChecks, Menu, RotateCcw, ScanSearch, Users, X } from 'lucide-react';
+import { BarChart3, Info, KanbanSquare, ListChecks, Menu, RotateCcw, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAppState } from '../state/AppState';
+import { DemoBadge } from './DemoBadge';
 import { Footer } from './Disclaimer';
+import { ImportDecisions } from './ImportDecisions';
 
 const NAV = [
   { to: '/roles', label: 'Roles & Criteria', icon: ListChecks },
@@ -17,100 +19,91 @@ export function Layout() {
   useEffect(() => setOpen(false), [location.pathname]);
   // New page → start at the top (unless jumping to an anchor).
   useEffect(() => {
-    if (!location.hash) window.scrollTo(0, 0);
+    if (!location.hash || location.hash.includes('=')) window.scrollTo(0, 0);
   }, [location.pathname, location.hash]);
 
   return (
-    <div className="min-h-screen lg:flex">
-      {/* Mobile top bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-navy-800 bg-navy-900 px-4 py-3 text-white lg:hidden">
-        <Brand />
-        <button
-          className="rounded-lg p-2 hover:bg-navy-800"
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
-
-      {open && (
-        <div className="fixed inset-0 z-30 bg-navy-950/40 lg:hidden" onClick={() => setOpen(false)} aria-hidden />
-      )}
-
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-navy-900 text-navy-100 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="hidden px-5 pt-6 pb-4 lg:block">
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-30 border-b border-ink-100 bg-white/90 backdrop-blur">
+        <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
+          <button
+            className="-ml-2 rounded-full p-2 text-ink-700 hover:bg-ink-100 lg:hidden"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
           <Brand />
+          <DemoBadge className="ml-auto hidden sm:inline-flex" />
         </div>
-        <div className="px-5 pt-5 pb-2 text-[11px] font-medium uppercase tracking-wider text-navy-400 lg:pt-2">
-          Weekly hiring loop
+        <div className="flex justify-center border-t border-ink-100 py-1.5 sm:hidden">
+          <DemoBadge />
         </div>
-        <nav className="flex flex-col gap-1 px-3" aria-label="Main">
-          {NAV.map(({ to, label, icon: Icon }) => (
+      </header>
+
+      {open && <div className="fixed inset-0 z-30 bg-ink-950/20 lg:hidden" onClick={() => setOpen(false)} aria-hidden />}
+
+      <div className="lg:flex">
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-white px-3 pb-4 pt-5 shadow-xl transition-transform lg:sticky lg:top-14 lg:z-0 lg:h-[calc(100vh-3.5rem)] lg:w-56 lg:translate-x-0 lg:shadow-none ${
+            open ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="mb-4 px-3 lg:hidden">
+            <Brand />
+          </div>
+          <nav className="flex flex-col gap-0.5" aria-label="Main">
+            {NAV.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                data-tour={`nav-${to.slice(1)}`}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-full px-3 py-2 text-sm transition-colors ${
+                    isActive ? 'bg-ink-100 font-medium text-ink-900' : 'text-ink-500 hover:text-ink-900'
+                  }`
+                }
+              >
+                <Icon className="h-4 w-4" aria-hidden />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="mt-auto flex flex-col gap-0.5">
             <NavLink
-              key={to}
-              to={to}
-              data-tour={`nav-${to.slice(1)}`}
+              to="/about"
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-navy-800 text-white' : 'text-navy-200 hover:bg-navy-800/60 hover:text-white'
+                `flex items-center gap-3 rounded-full px-3 py-2 text-sm transition-colors ${
+                  isActive ? 'bg-ink-100 text-ink-900' : 'text-ink-500 hover:text-ink-900'
                 }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-teal-300' : ''}`} aria-hidden />
-                  {label}
-                </>
-              )}
+              <Info className="h-4 w-4" aria-hidden />
+              About
             </NavLink>
-          ))}
-        </nav>
+            <ResetButton />
+          </div>
+        </aside>
 
-        <div className="mt-auto flex flex-col gap-1 border-t border-navy-800 px-3 py-4">
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                isActive ? 'bg-navy-800 text-white' : 'text-navy-300 hover:bg-navy-800/60 hover:text-white'
-              }`
-            }
-          >
-            <Info className="h-4 w-4" aria-hidden />
-            About this project
-          </NavLink>
-          <ResetButton />
-          <p className="px-3 pt-2 text-[11px] leading-snug text-navy-400">
-            Unofficial concept demo — not a Glot product. All candidates are fictional.
-          </p>
-        </div>
-      </aside>
-
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-        <div className="mx-auto max-w-6xl">
-          <Outlet />
-          <Footer />
-        </div>
-      </main>
+        <main className="min-w-0 flex-1 px-4 pb-6 pt-8 sm:px-8 lg:px-12 lg:pt-10">
+          <div className="mx-auto max-w-5xl">
+            <Outlet />
+            <Footer />
+          </div>
+        </main>
+      </div>
+      <ImportDecisions />
     </div>
   );
 }
 
-function Brand() {
+export function Brand() {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/15 text-teal-300">
-        <ScanSearch className="h-4 w-4" aria-hidden />
-      </div>
-      <div className="leading-tight">
-        <div className="text-sm font-semibold text-white">Talent Scout</div>
-        <div className="text-[11px] text-navy-300">Concept for Glot</div>
-      </div>
+    <div className="flex items-center gap-2">
+      <span className="text-[15px] font-semibold tracking-tightish text-ink-900">Talent Scout</span>
+      <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-medium text-ink-500">Unofficial demo</span>
     </div>
   );
 }
@@ -121,11 +114,11 @@ function ResetButton() {
 
   if (confirming) {
     return (
-      <div className="rounded-lg bg-navy-800 p-3 text-sm">
-        <p className="mb-2 text-navy-100">Reset all edits to the original demo data?</p>
+      <div className="rounded-2xl bg-ink-50 p-3 text-sm">
+        <p className="mb-2 text-ink-700">Reset all edits?</p>
         <div className="flex gap-2">
           <button
-            className="btn bg-teal-500 px-2.5 py-1.5 text-navy-950 hover:bg-teal-400"
+            className="btn-primary px-3 py-1.5"
             onClick={() => {
               resetDemo();
               setConfirming(false);
@@ -133,7 +126,7 @@ function ResetButton() {
           >
             Reset
           </button>
-          <button className="btn px-2.5 py-1.5 text-navy-200 hover:bg-navy-700" onClick={() => setConfirming(false)}>
+          <button className="btn-ghost px-3 py-1.5" onClick={() => setConfirming(false)}>
             Cancel
           </button>
         </div>
@@ -142,7 +135,7 @@ function ResetButton() {
   }
   return (
     <button
-      className="flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-navy-300 transition-colors hover:bg-navy-800/60 hover:text-white"
+      className="flex items-center gap-3 rounded-full px-3 py-2 text-left text-sm text-ink-500 transition-colors hover:text-ink-900"
       onClick={() => setConfirming(true)}
     >
       <RotateCcw className="h-4 w-4" aria-hidden />

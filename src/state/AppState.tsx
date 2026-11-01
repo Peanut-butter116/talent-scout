@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
-import { createSeedState, loadState, reducer, saveState, type Action, type AppState } from './reducer';
+import { clearRankMemory } from './rankMemory';
+import { createSeedState, loadState, reducer, saveState, STORAGE_KEY, type Action, type AppState } from './reducer';
 
 interface Ctx {
   state: AppState;
@@ -26,7 +27,20 @@ export function AppStateProvider({ children, initial }: { children: ReactNode; i
     saveState(getStorage(), state);
   }, [state]);
 
-  const resetDemo = useCallback(() => dispatch({ type: 'RESET' }), []);
+  // Another tab (e.g. /review opened from this browser) saved changes: pick them up live.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      dispatch({ type: 'HYDRATE', state: loadState(getStorage()) });
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  const resetDemo = useCallback(() => {
+    clearRankMemory();
+    dispatch({ type: 'RESET' });
+  }, []);
   const value = useMemo(() => ({ state, dispatch, resetDemo }), [state, resetDemo]);
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }

@@ -40,27 +40,23 @@ export function OutreachModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-navy-950/50 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Draft outreach">
-      <div className="w-full max-w-xl rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+    <div className="fixed inset-0 z-[55] flex items-end justify-center bg-ink-950/30 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Draft outreach">
+      <div className="w-full max-w-xl rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+        <div className="flex items-start justify-between gap-4 px-6 pb-2 pt-6">
           <div>
-            <h2 className="font-semibold text-navy-900">Draft outreach to {candidate.name}</h2>
-            <p className="text-xs text-slate-500">{role.title} · references their strongest evidence</p>
+            <h2 className="text-lg font-semibold text-ink-900">Message {candidate.name.split(' ')[0]}</h2>
+            <p className="text-sm text-ink-500">{role.title}</p>
           </div>
           <button className="btn-ghost -mr-2 p-2" onClick={onClose} aria-label="Close draft">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-5 py-4">
-          <div className="mb-3 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
-            <MailX className="h-4 w-4 shrink-0" />
-            Draft only — not sent. Talent Scout never sends messages.
-          </div>
-          {candidate.contactNote && (
-            <p className="mb-3 text-sm text-slate-600">
-              <span className="font-medium text-navy-900">Contact note:</span> {candidate.contactNote}
-            </p>
-          )}
+        <div className="px-6 py-3">
+          <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
+            <MailX className="h-3.5 w-3.5 shrink-0" />
+            Draft only — not sent
+          </p>
+          {candidate.contactNote && <p className="mb-3 text-sm text-ink-500">{candidate.contactNote}</p>}
           <textarea
             className="input h-64 resize-y font-[inherit] leading-relaxed"
             value={text}
@@ -68,19 +64,19 @@ export function OutreachModal({
             aria-label="Outreach message"
           />
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-2 px-6 pb-6 pt-2 sm:flex-row sm:justify-end">
           <button className="btn-secondary" onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             {copied ? 'Copied' : 'Copy message'}
           </button>
           {candidate.profileUrl ? (
             <a className="btn-secondary" href={candidate.profileUrl} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4" /> Open profile to message
+              <ExternalLink className="h-4 w-4" /> Open profile
             </a>
           ) : (
             <span title={DEMO_PROFILE_TOOLTIP} className="inline-flex">
               <button className="btn-secondary w-full" disabled>
-                <ExternalLink className="h-4 w-4" /> Open profile to message
+                <ExternalLink className="h-4 w-4" /> Open profile
               </button>
             </span>
           )}
@@ -92,7 +88,7 @@ export function OutreachModal({
                 onClose();
               }}
             >
-              I've sent it myself — mark contacted
+              Mark contacted
             </button>
           )}
         </div>

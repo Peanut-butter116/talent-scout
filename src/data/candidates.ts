@@ -76,9 +76,9 @@ export const SEED_CANDIDATES: Candidate[] = [
     source: 'Network referral',
     status: 'new',
     evidence: {
-      ai_model: ev(4, 'weak', 'Trained a small streaming VAD model; mostly serves larger models'),
+      ai_model: ev(3, 'weak', 'Mostly serves and quantises models others trained'),
       ai_rt: ev(5, 'strong', 'Cut p95 inference latency from 900ms to 140ms on live video'),
-      ai_pedigree: ev(2, 'weak', 'Mid-size infra company; no research lab or early AI team'),
+      ai_pedigree: ev(3, 'weak', 'Mid-size infra company; no research lab or early AI team'),
       ai_judgement: ev(4, 'strong', 'Led a no-regrets migration plan with explicit rollback'),
       ai_builder: ev(4, 'strong', 'Built the team\'s GPU batching server, now open source'),
       ai_sharp: ev(3, 'weak', 'Referrer describes as "quietly thorough"'),

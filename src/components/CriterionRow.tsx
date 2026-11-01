@@ -26,7 +26,7 @@ export function WeightSlider({
         step={1}
         value={criterion.weight}
         onChange={(e) => set(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer accent-teal-600"
+        className="h-1.5 w-full cursor-pointer accent-teal-700"
         aria-label={`Weight for ${criterion.name}`}
       />
       <input
@@ -38,7 +38,7 @@ export function WeightSlider({
           const v = Number(e.target.value);
           if (!Number.isNaN(v)) set(v);
         }}
-        className="w-16 rounded-md border border-slate-300 px-2 py-1 text-right text-sm tabular-nums focus:border-teal-500 focus:outline-none"
+        className="w-14 rounded-lg border border-ink-200 px-2 py-1 text-right text-sm tabular-nums focus:border-teal-600 focus:outline-none"
         aria-label={`Weight value for ${criterion.name}`}
       />
     </div>
@@ -93,9 +93,9 @@ export function CriterionRow({
             </div>
           ) : (
             <div className="flex items-start gap-2">
-              <span className="text-sm font-medium text-navy-900">{criterion.name}</span>
+              <span className="text-[15px] text-ink-900">{criterion.name}</span>
               <button
-                className="mt-0.5 text-slate-400 hover:text-navy-700"
+                className="mt-1 text-ink-300 hover:text-ink-700"
                 onClick={() => {
                   setDraft(criterion.name);
                   setEditing(true);
@@ -118,7 +118,7 @@ export function CriterionRow({
           {confirmRemove ? (
             <div className="flex items-center gap-1">
               <button
-                className="btn bg-rose-600 px-2 py-1 text-xs text-white hover:bg-rose-700"
+                className="btn bg-rose-600 px-3 py-1 text-xs text-white hover:bg-rose-700"
                 onClick={() => dispatch({ type: 'REMOVE_CRITERION', roleId: role.id, criterionId: criterion.id })}
               >
                 Remove
@@ -129,7 +129,7 @@ export function CriterionRow({
             </div>
           ) : (
             <button
-              className="btn-ghost p-1.5 text-slate-400 hover:text-rose-600 disabled:hover:text-slate-400"
+              className="btn-ghost p-1.5 text-ink-300 hover:text-rose-600 disabled:hover:text-ink-300"
               onClick={() => setConfirmRemove(true)}
               disabled={role.criteria.length <= 1}
               aria-label={`Remove ${criterion.name}`}

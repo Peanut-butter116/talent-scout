@@ -1,20 +1,24 @@
-import { AlertTriangle, Globe2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import type { HypothesisLabel } from '../lib/analysis';
 import { STATUS_LABEL } from '../lib/pipeline';
 import type { Confidence } from '../lib/scoring';
 import type { EvidenceStrength, PipelineStatus } from '../types';
 
-const HYP: Record<HypothesisLabel, string> = {
-  'Holding up': 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-  Unclear: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
-  'Not supported': 'bg-rose-50 text-rose-700 ring-1 ring-rose-200',
-  'Not tested yet': 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
+function Dot({ className }: { className: string }) {
+  return <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${className}`} aria-hidden />;
+}
+
+const HYP_DOT: Record<HypothesisLabel, string> = {
+  'Holding up': 'bg-teal-600',
+  Unclear: 'bg-amber-400',
+  'Not supported': 'bg-rose-500',
+  'Not tested yet': 'bg-ink-300',
 };
 
 export function HypothesisChip({ label }: { label: HypothesisLabel }) {
   return (
-    <span className={`chip ${HYP[label]}`} title="Hypothesis status, from coffee-chat feedback on the Learning page">
-      <span className="text-[10px] uppercase tracking-wide opacity-70">Hypothesis</span>
+    <span className="chip bg-white text-ink-700 ring-1 ring-ink-200" title={`Hypothesis: ${label}`}>
+      <Dot className={HYP_DOT[label]} />
       {label}
     </span>
   );
@@ -22,44 +26,45 @@ export function HypothesisChip({ label }: { label: HypothesisLabel }) {
 
 export function GlotWideBadge() {
   return (
-    <span className="chip bg-navy-50 text-navy-600 ring-1 ring-navy-100" title="Appears in every Glot role">
-      <Globe2 className="h-3 w-3" aria-hidden />
+    <span className="chip bg-ink-100 text-ink-500" title="Appears in every Glot role">
       Glot-wide quality
     </span>
   );
 }
 
-const CONF: Record<Confidence, string> = {
-  High: 'bg-emerald-50 text-emerald-700',
-  Medium: 'bg-amber-50 text-amber-700',
-  Low: 'bg-slate-100 text-slate-600',
+const CONF_DOT: Record<Confidence, string> = {
+  High: 'bg-teal-600',
+  Medium: 'bg-amber-400',
+  Low: 'bg-ink-300',
 };
 
 export function ConfidenceChip({ confidence }: { confidence: Confidence }) {
-  return <span className={`chip ${CONF[confidence]}`}>{confidence}</span>;
+  return (
+    <span className="chip px-0 text-ink-700">
+      <Dot className={CONF_DOT[confidence]} />
+      {confidence}
+    </span>
+  );
 }
 
-const STATUS: Record<PipelineStatus, string> = {
-  new: 'bg-slate-100 text-slate-600',
-  suggested: 'bg-sky-50 text-sky-700',
-  approved: 'bg-indigo-50 text-indigo-700',
-  contacted: 'bg-violet-50 text-violet-700',
-  booked: 'bg-teal-50 text-teal-700',
-  done: 'bg-emerald-50 text-emerald-700',
-  skipped: 'bg-slate-100 text-slate-500 line-through decoration-slate-400',
-};
-
 export function StatusChip({ status }: { status: PipelineStatus }) {
-  return <span className={`chip ${STATUS[status]}`}>{STATUS_LABEL[status]}</span>;
+  const tone =
+    status === 'done' || status === 'booked'
+      ? 'bg-teal-50 text-teal-800'
+      : status === 'new'
+        ? 'text-ink-400'
+        : status === 'skipped'
+          ? 'bg-ink-100 text-ink-400'
+          : 'bg-ink-100 text-ink-700';
+  return <span className={`chip ${tone}`}>{STATUS_LABEL[status]}</span>;
 }
 
 export function StrengthChip({ strength }: { strength: EvidenceStrength | 'missing' }) {
-  if (strength === 'missing')
-    return <span className="chip border border-dashed border-slate-300 text-slate-500">Missing</span>;
+  if (strength === 'missing') return <span className="chip text-ink-400 ring-1 ring-dashed ring-ink-200">Missing</span>;
   return strength === 'strong' ? (
-    <span className="chip bg-teal-50 text-teal-700">Strong</span>
+    <span className="chip bg-teal-50 text-teal-800">Strong</span>
   ) : (
-    <span className="chip bg-amber-50 text-amber-700">Weak</span>
+    <span className="chip bg-amber-50 text-amber-800">Weak</span>
   );
 }
 

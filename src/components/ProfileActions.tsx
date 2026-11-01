@@ -14,7 +14,7 @@ export function ProfileActions({
 }) {
   const sm = size === 'sm';
   const cls = sm
-    ? 'inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-navy-700 hover:bg-slate-50'
+    ? 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-ink-600 ring-1 ring-ink-200 hover:bg-ink-50'
     : 'btn-secondary';
   return (
     <div className="flex flex-wrap gap-1.5" data-no-drag>

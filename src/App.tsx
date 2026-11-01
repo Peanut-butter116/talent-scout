@@ -6,11 +6,14 @@ import { HowItWorksPage } from './pages/HowItWorksPage';
 import { LearningPage } from './pages/LearningPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PipelinePage } from './pages/PipelinePage';
+import { ReviewPage } from './pages/ReviewPage';
 import { RolesPage } from './pages/RolesPage';
 
 export default function App() {
   return (
     <Routes>
+      {/* Standalone, full-screen CEO review — no sidebar. */}
+      <Route path="review" element={<ReviewPage />} />
       <Route element={<Layout />}>
         <Route index element={<Navigate to="/roles" replace />} />
         <Route path="roles" element={<RolesPage />} />
