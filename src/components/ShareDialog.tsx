@@ -1,12 +1,21 @@
 import { Check, Copy, ExternalLink, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { startOfWeek } from '../lib/pipeline';
+import { SHORTLIST_SIZE, startOfWeek } from '../lib/pipeline';
 import { compareCautious, rankCandidates } from '../lib/scoring';
 import { encodeReviewHash, isShareable, MAX_SHARED, weekKey } from '../lib/share';
 import { useAppState } from '../state/AppState';
 
 /** "Shortlist ready" popup: open the CEO review in a new tab, or copy a link for the CEO. */
-export function ShareDialog({ roleId, onClose }: { roleId: string | null; onClose: () => void }) {
+export function ShareDialog({
+  roleId,
+  onClose,
+  generated,
+}: {
+  roleId: string | null;
+  onClose: () => void;
+  /** How many were just added by "Generate shortlist" (undefined when opened via Share). */
+  generated?: number;
+}) {
   const { state } = useAppState();
   const [copied, setCopied] = useState(false);
 
@@ -59,6 +68,11 @@ export function ShareDialog({ roleId, onClose }: { roleId: string | null; onClos
               Shortlist ready — {ids.length} {ids.length === 1 ? 'candidate' : 'candidates'}
             </h2>
             <p className="mt-1 text-sm text-ink-500">Send it to the CEO to swipe through.</p>
+            {generated !== undefined && generated < SHORTLIST_SIZE && (
+              <p className="mt-1 text-sm text-ink-500">
+                Only {generated} new {generated === 1 ? 'candidate' : 'candidates'} this week.
+              </p>
+            )}
             <div className="mt-5 flex flex-col gap-2">
               <a href={url} target="_blank" rel="noopener noreferrer" className="btn-primary w-full" data-tour="open-review">
                 Open review <ExternalLink className="h-4 w-4" />

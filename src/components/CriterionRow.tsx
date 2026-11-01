@@ -26,7 +26,7 @@ export function WeightSlider({
         step={1}
         value={criterion.weight}
         onChange={(e) => set(Number(e.target.value))}
-        className="h-1.5 w-full cursor-pointer accent-teal-700"
+        className="h-1.5 w-full cursor-pointer accent-ink-900"
         aria-label={`Weight for ${criterion.name}`}
       />
       <input
@@ -38,7 +38,7 @@ export function WeightSlider({
           const v = Number(e.target.value);
           if (!Number.isNaN(v)) set(v);
         }}
-        className="w-14 rounded-lg border border-ink-200 px-2 py-1 text-right text-sm tabular-nums focus:border-teal-600 focus:outline-none"
+        className="w-14 rounded-lg border border-ink-200 px-2 py-1 text-right text-sm tabular-nums focus:border-ink-900 focus:outline-none"
         aria-label={`Weight value for ${criterion.name}`}
       />
     </div>

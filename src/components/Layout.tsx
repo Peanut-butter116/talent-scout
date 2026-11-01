@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAppState } from '../state/AppState';
 import { DemoBadge } from './DemoBadge';
+import { BuiltForGlot } from './GlotLogo';
 import { Footer } from './Disclaimer';
 import { ImportDecisions } from './ImportDecisions';
 
@@ -35,10 +36,15 @@ export function Layout() {
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <Brand />
-          <DemoBadge className="ml-auto hidden sm:inline-flex" />
+          <BuiltForGlot className="ml-auto sm:ml-3 sm:border-l sm:border-ink-200 sm:pl-3" />
+          <div className="ml-auto hidden items-center gap-4 sm:flex">
+            <NavLink to="/about" className="text-sm text-ink-500 hover:text-ink-900">About</NavLink>
+            <DemoBadge />
+          </div>
         </div>
-        <div className="flex justify-center border-t border-ink-100 py-1.5 sm:hidden">
+        <div className="flex items-center justify-center gap-3 border-t border-ink-100 py-1.5 sm:hidden">
           <DemoBadge />
+          <NavLink to="/about" className="text-xs text-ink-500 hover:text-ink-900">About</NavLink>
         </div>
       </header>
 
@@ -103,7 +109,7 @@ export function Brand() {
   return (
     <div className="flex items-center gap-2">
       <span className="text-[15px] font-semibold tracking-tightish text-ink-900">Talent Scout</span>
-      <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-medium text-ink-500">Unofficial demo</span>
+      <span className="hidden rounded-full bg-ink-100 px-2 py-0.5 text-[11px] font-medium text-ink-500 min-[380px]:inline">Unofficial demo</span>
     </div>
   );
 }

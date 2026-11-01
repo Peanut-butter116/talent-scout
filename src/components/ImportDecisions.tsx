@@ -69,7 +69,7 @@ export function ImportDecisions() {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink-950/30 p-4" role="dialog" aria-modal="true" aria-label="Import CEO decisions">
       <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
-        <Inbox className="mb-3 h-5 w-5 text-teal-700" aria-hidden />
+        <Inbox className="mb-3 h-5 w-5 text-ink-900" aria-hidden />
         {body}
       </div>
     </div>

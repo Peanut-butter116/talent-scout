@@ -153,7 +153,7 @@ export function ReviewStack({
             <RoundButton label="Priority" onClick={() => cardRef.current?.fly('priority')} className="h-12 w-12 text-amber-500" small>
               <Star className="h-5 w-5" />
             </RoundButton>
-            <RoundButton label="Approve" onClick={() => cardRef.current?.fly('approve')} className="text-teal-700">
+            <RoundButton label="Approve" onClick={() => cardRef.current?.fly('approve')} className="text-ink-900">
               <Check className="h-6 w-6" />
             </RoundButton>
           </div>
@@ -290,7 +290,7 @@ const SwipeCard = forwardRef<
           <div
             className={`pointer-events-none absolute top-5 z-10 rounded-full px-3 py-1 text-sm font-semibold ${
               hint === 'approve'
-                ? 'right-5 bg-teal-700 text-white'
+                ? 'right-5 bg-ink-900 text-white'
                 : hint === 'skip'
                   ? 'left-5 bg-rose-600 text-white'
                   : 'left-1/2 -translate-x-1/2 bg-amber-400 text-ink-900'
@@ -301,7 +301,7 @@ const SwipeCard = forwardRef<
           </div>
         )}
 
-        {showRole && <div className="mb-1 text-xs font-medium text-teal-700">{role.title}</div>}
+        {showRole && <div className="mb-1 text-xs font-medium text-ink-500">{role.title}</div>}
         <h3 className="text-2xl font-semibold text-ink-900">{c.name}</h3>
         <p className="text-[15px] text-ink-500">{c.headline}</p>
 
@@ -369,7 +369,7 @@ const SwipeCard = forwardRef<
               href={role.jdUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:text-teal-800"
+              className="inline-flex items-center gap-1 text-xs font-medium text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900"
             >
               Job description <ExternalLink className="h-3 w-3" />
             </a>

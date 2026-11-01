@@ -104,8 +104,8 @@ export function LearningPage() {
       />
 
       {awaiting.length > 0 && (
-        <section className="mb-10 flex flex-col gap-3 rounded-2xl bg-teal-50 p-5 sm:flex-row sm:items-center" aria-label="Chats awaiting feedback">
-          <div className="flex items-center gap-2 text-sm font-medium text-teal-900">
+        <section className="mb-10 flex flex-col gap-3 rounded-2xl bg-ink-100 p-5 sm:flex-row sm:items-center" aria-label="Chats awaiting feedback">
+          <div className="flex items-center gap-2 text-sm font-medium text-ink-900">
             <Coffee className="h-4 w-4" /> {awaiting.length} {awaiting.length === 1 ? 'chat needs' : 'chats need'} feedback
           </div>
           <div className="flex flex-wrap gap-2 sm:ml-auto">
@@ -323,9 +323,9 @@ export function LearningPage() {
       {toast && (
         <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4" role="status" aria-live="polite">
           <div className="flex items-center gap-3 rounded-full bg-ink-900 px-5 py-2.5 text-sm text-white shadow-2xl">
-            <Check className="h-4 w-4 text-teal-300" />
+            <Check className="h-4 w-4 text-white" />
             {toast}
-            <Link to="/candidates" className="font-medium text-teal-300 hover:text-teal-200">Ranking</Link>
+            <Link to="/candidates" className="font-medium text-white underline underline-offset-4">Ranking</Link>
           </div>
         </div>
       )}

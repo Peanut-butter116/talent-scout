@@ -132,7 +132,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
       aria-label={`${label} ${checked ? 'on' : 'off'}`}
       onClick={onChange}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        checked ? 'bg-teal-700' : 'bg-ink-200'
+        checked ? 'bg-ink-900' : 'bg-ink-200'
       }`}
     >
       <span

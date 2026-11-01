@@ -209,7 +209,7 @@ export function CandidatesPage() {
                       <td className="py-4 pr-3">
                         <div className="flex items-center gap-1.5">
                           <span className="whitespace-nowrap font-medium text-ink-900">{r.candidate.name}</span>
-                          <ProfileLink candidate={r.candidate} iconOnly className="rounded-full p-0.5 text-ink-300 hover:text-teal-700" />
+                          <ProfileLink candidate={r.candidate} iconOnly className="rounded-full p-0.5 text-ink-300 hover:text-ink-900" />
                           {r.mustHaves.flagged && <FlagChip label="Must-have" />}
                         </div>
                         {r.needsMoreEvidence && <NeedsEvidence />}
@@ -281,7 +281,7 @@ function Select({
   return (
     <select
       aria-label={label}
-      className="rounded-full border-0 bg-white py-2 pl-3.5 pr-8 text-sm text-ink-700 ring-1 ring-ink-200 focus:ring-2 focus:ring-teal-600"
+      className="rounded-full border-0 bg-white py-2 pl-3.5 pr-8 text-sm text-ink-700 ring-1 ring-ink-200 focus:ring-2 focus:ring-ink-900"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >
