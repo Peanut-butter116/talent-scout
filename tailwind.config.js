@@ -26,9 +26,17 @@ export default {
           '0%': { backgroundColor: 'rgb(204 251 241)' },
           '100%': { backgroundColor: 'transparent' },
         },
+        match: {
+          '0%': { opacity: '0', transform: 'translateY(16px) scale(0.96)' },
+          '12%': { opacity: '1', transform: 'translateY(0) scale(1.02)' },
+          '20%': { transform: 'scale(1)' },
+          '85%': { opacity: '1' },
+          '100%': { opacity: '0', transform: 'translateY(8px)' },
+        },
       },
       animation: {
         moved: 'moved 1.6s ease-out',
+        match: 'match 2.4s ease-out forwards',
       },
     },
   },

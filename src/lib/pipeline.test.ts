@@ -56,3 +56,15 @@ describe('draftOutreach', () => {
     expect(text).toMatch(/streaming ASR|noise suppression/);
   });
 });
+
+describe('draftOutreach evidence', () => {
+  it('never quotes weak evidence', () => {
+    for (const c of SEED_CANDIDATES) {
+      const role = SEED_ROLES.find((r) => r.id === c.roleId)!;
+      const text = draftOutreach(c, role);
+      for (const e of Object.values(c.evidence)) {
+        if (e?.strength === 'weak') expect(text.toLowerCase()).not.toContain(e.note.toLowerCase().slice(1, 30));
+      }
+    }
+  });
+});

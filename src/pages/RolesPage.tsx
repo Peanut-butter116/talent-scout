@@ -44,8 +44,8 @@ export function RolesPage() {
       />
       <RoleSelector />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <section className="card p-5">
             <h2 className="text-lg font-semibold text-navy-900">{role.title}</h2>
             <p className="mt-1 text-sm text-slate-600">{role.summary}</p>

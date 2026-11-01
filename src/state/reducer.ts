@@ -2,18 +2,22 @@ import { SEED_CANDIDATES } from '../data/candidates';
 import { SEED_CHATS } from '../data/chats';
 import { SEED_ROLES } from '../data/roles';
 import type { RubricSuggestion } from '../lib/analysis';
+import { pickShortlist } from '../lib/pipeline';
 import { addCriterion, applyWeightChanges, removeCriterion, setWeight } from '../lib/weights';
 import type {
   Candidate,
   ChatFeedback,
   MustHaveValue,
   PipelineStatus,
+  ReviewDecision,
+  ReviewEntry,
   Role,
+  SkipReason,
   WeightChange,
 } from '../types';
 
-export const STATE_VERSION = 1;
-export const STORAGE_KEY = 'talent-scout:v1';
+export const STATE_VERSION = 2;
+export const STORAGE_KEY = 'talent-scout:v2';
 
 export interface AppState {
   version: number;
@@ -22,6 +26,7 @@ export interface AppState {
   chats: ChatFeedback[];
   weightHistory: WeightChange[];
   dismissedSuggestions: string[];
+  reviewLog: ReviewEntry[];
   selectedRoleId: string;
   welcomeSeen: boolean;
 }
@@ -36,6 +41,7 @@ export function createSeedState(): AppState {
     chats: deepCopy(SEED_CHATS),
     weightHistory: [],
     dismissedSuggestions: [],
+    reviewLog: [],
     selectedRoleId: SEED_ROLES[0].id,
     welcomeSeen: false,
   };
@@ -49,7 +55,23 @@ export type Action =
   | { type: 'ADD_CRITERION'; roleId: string; name: string; id?: string; at?: string }
   | { type: 'REMOVE_CRITERION'; roleId: string; criterionId: string; at?: string }
   | { type: 'TOGGLE_MUST_HAVE'; roleId: string; mustHaveId: string }
-  | { type: 'SET_STATUS'; candidateIds: string[]; status: PipelineStatus; at?: string }
+  | {
+      type: 'SET_STATUS';
+      candidateIds: string[];
+      status: PipelineStatus;
+      skipReason?: SkipReason;
+      at?: string;
+    }
+  | { type: 'GENERATE_SHORTLIST'; roleId: string | null; at?: string }
+  | {
+      type: 'REVIEW_DECISION';
+      candidateId: string;
+      decision: ReviewDecision;
+      reason?: SkipReason;
+      at?: string;
+    }
+  | { type: 'UNDO_REVIEW' }
+  | { type: 'SET_REPLIED'; candidateId: string; replied: boolean }
   | { type: 'SET_MUST_HAVE_VALUE'; candidateId: string; mustHaveId: string; value: MustHaveValue }
   | { type: 'LOG_CHAT'; chat: ChatFeedback }
   | { type: 'ACCEPT_SUGGESTION'; suggestion: RubricSuggestion; at?: string }
@@ -190,10 +212,77 @@ export function reducer(state: AppState, action: Action): AppState {
             delete next.shortlistedAt;
             delete next.contactedAt;
           }
+          if (action.status === 'skipped') {
+            if (action.skipReason) next.skipReason = action.skipReason;
+          } else {
+            delete next.skipReason;
+          }
           return next;
         }),
       };
     }
+
+    case 'GENERATE_SHORTLIST': {
+      const ids = pickShortlist(state.candidates, state.roles, action.roleId);
+      if (ids.length === 0) return state;
+      return reducer(state, { type: 'SET_STATUS', candidateIds: ids, status: 'suggested', at: action.at });
+    }
+
+    case 'REVIEW_DECISION': {
+      const cand = state.candidates.find((c) => c.id === action.candidateId);
+      if (!cand) return state;
+      const at = action.at ?? new Date().toISOString();
+      const entry: ReviewEntry = {
+        id: uid('rev'),
+        candidateId: cand.id,
+        roleId: cand.roleId,
+        decision: action.decision,
+        reason: action.reason,
+        at,
+        prev: { status: cand.status, priority: cand.priority, skipReason: cand.skipReason },
+      };
+      const status: PipelineStatus = action.decision === 'skip' ? 'skipped' : 'approved';
+      const next = reducer(state, {
+        type: 'SET_STATUS',
+        candidateIds: [cand.id],
+        status,
+        skipReason: action.reason,
+        at,
+      });
+      return {
+        ...next,
+        candidates: next.candidates.map((c) =>
+          c.id === cand.id ? { ...c, priority: action.decision === 'priority' ? true : undefined } : c,
+        ),
+        reviewLog: [...state.reviewLog, entry],
+      };
+    }
+
+    case 'UNDO_REVIEW': {
+      const last = state.reviewLog[state.reviewLog.length - 1];
+      if (!last) return state;
+      return {
+        ...state,
+        reviewLog: state.reviewLog.slice(0, -1),
+        candidates: state.candidates.map((c) => {
+          if (c.id !== last.candidateId) return c;
+          const restored: Candidate = { ...c, status: last.prev.status };
+          if (last.prev.priority) restored.priority = true;
+          else delete restored.priority;
+          if (last.prev.skipReason) restored.skipReason = last.prev.skipReason;
+          else delete restored.skipReason;
+          return restored;
+        }),
+      };
+    }
+
+    case 'SET_REPLIED':
+      return {
+        ...state,
+        candidates: state.candidates.map((c) =>
+          c.id === action.candidateId ? { ...c, replied: action.replied } : c,
+        ),
+      };
 
     case 'SET_MUST_HAVE_VALUE':
       return {
