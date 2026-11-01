@@ -20,15 +20,15 @@ Design for clarity and speed, not feature count.
 - Static single-page app deployed on Vercel. Add a vercel.json rewrite so every
   route serves index.html (deep links and refresh must not 404).
 - No backend, no database, no API keys, no real email, no scraping, no analytics.
-- Network: the app itself makes NO network calls except downloading the on-device
-  embedding model files for evidence extraction (see SOURCING). External links that
+- Network: the app itself makes NO third-party network calls except downloading the
+  on-device embedding model files for evidence extraction (see SOURCING). External links that
   open in a new tab when the user clicks are allowed: Glot job-description links,
   LinkedIn search/profile links, and the model sources on /how-it-works. Profile text
   is never sent anywhere.
 - All state in one React context + reducer, persisted to localStorage under a single
   versioned key. Each visitor's edits stay private to their browser.
   resetDemo() restores the seed data. Whenever the saved-state shape changes, bump the
-  version and storage key (currently v4) so old saved state resets cleanly.
+  version and storage key (currently v5) so old saved state resets cleanly.
 - Keep code modular: /src/data (seed), /src/lib (scoring, analysis — pure functions
   with tests), /src/state, /src/pages, /src/components.
 
@@ -39,8 +39,10 @@ Design for clarity and speed, not feature count.
 - No photos, ages, gender, nationality or other protected characteristics anywhere.
 - The "Interactive demo · fictional candidates" badge shows ONCE, in the app header
   (and in the /review header) — not repeated on every page.
-- Footer/About: "Unofficial concept demo — not a Glot product. Roles are based on
-  Glot's public job ads; all candidates and activity are fictional."
+- Credit line (replaces the old disclaimer), shown ONCE per page in the footer and on
+  /review: "Candidate outreach demo for Glot · Built by Sijia He · Not an official Glot
+  product · Contact" — "Contact" is a mailto to sijia.he116@outlook.com with subject
+  "Talent Scout demo". The full email address appears in text only on the About page.
 - Never imply simulated analysis is live AI. The on-device matching model is labelled
   "Suggested by an on-device matching model — please check."; the hypothesis analysis
   is simple transparent rules.
@@ -115,7 +117,8 @@ Must-have checks are Yes / No / Unknown. "Unknown" never excludes a candidate; i
 shows "Check at first call". Only an explicit "No" flags them.
 
 # CANDIDATES
-4–5 fictional candidates per role (~22 total). Each has: name, headline, current
+7–9 fictional candidates per role (41 total) so every role can fill a shortlist of 5
+new candidates. Each has: name, headline, current
 fictional employer, role applied to, sourcing channel (LinkedIn direct / Network
 referral / Agency / Inbound), and per-criterion evidence that is EITHER
 {rating 0–5, strength: strong|weak, one-line evidence note} OR MISSING.
@@ -227,24 +230,41 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
    https://huggingface.co/Xenova/all-MiniLM-L6-v2 , https://www.sbert.net ,
    https://huggingface.co/docs/transformers.js
 
-# STYLE (calm, airy — modelled on glot.com's feel)
-- glot.com could not be reached from the build environment (network policy 403), so
-  the fallback style is used. Never use Glot's logo, wordmark or images. App name stays
-  "Talent Scout" with a small "Unofficial demo" label next to it.
-- Tokens (tailwind.config.js, src/index.css):
-  - Background white (#ffffff). Ink near-black #111111. Secondary grey #737373;
-    muted #a3a3a3; hairlines #efefef/#e4e4e4; surfaces #f7f7f7.
-    (`navy` and `slate` are remapped to this neutral `ink` scale.)
-  - ONE accent: teal (#0f766e / tailwind teal-700) for links, the main accent button,
-    focus rings and small highlights. Semantic dots only for status: teal = good,
-    amber = unclear/weak, rose = not supported/flag.
-  - Font: system sans-serif stack (no web-font download). Headings semibold with
-    slight negative tracking; page titles ~34px; body 15px.
-  - Shapes: pill buttons (rounded-full), 16px cards (rounded-2xl), 24px sheets/modals.
-  - Fewer boxes and borders: borderless grey surfaces (`.card` = bg #f7f7f7), hairline
-    dividers in lists/tables, lots of whitespace (sections ~48–56px apart).
+# STYLE (matched to glot.com — captured Nov 2026)
+- Measured from www.glot.com (desktop 1440px + mobile 390px screenshots, computed styles):
+  - Background #ffffff. Ink #111111 (rgb 17,17,17) for text and primary buttons.
+    Warm greys: secondary #52524F, tertiary #6E6E6A, muted #8A8A86; surface #F2F2F0;
+    hairline #ECECEC. Glot's UI is essentially monochrome; a muted red #CB4644 appears
+    only as a small detail.
+  - Font: "Plus Jakarta Sans" (variable). Self-hosted via @fontsource-variable/
+    plus-jakarta-sans so no third-party font request is made. Headings weight 600 with
+    tight negative tracking (Glot uses ≈ −0.04em on the hero, −0.03em on h2); body 16px,
+    secondary text in warm grey.
+  - Buttons: black pills (rounded-full, #111 bg, white 14–16px medium text); nav links
+    grey pills; header is a floating rounded bar with a hairline border.
+  - Lots of whitespace, very few boxes.
+- Our tokens (tailwind.config.js, src/index.css): `ink` = the warm grey scale above
+  (`navy`/`slate` map to it). Primary accent = ink black (buttons, links with underline,
+  toggles, focus rings). Status colours only, never decoration: `teal` = muted green
+  #3F7D5A (good: strong evidence, holding up, done), amber (unclear/weak), `rose` = Glot
+  red #CB4644 (not supported, flags). Pill buttons, 16px cards, 24px sheets.
+- Glot's logo: header lockup saved as /public/glot-logo.svg (mark only:
+  /public/glot-mark.svg). Shown SMALL as "Built for [Glot logo]" next to the
+  "Talent Scout" name in the app header, on /review and on About. Talent Scout stays the
+  product name, with its small "Unofficial demo" label; never present the app as Glot's.
 - Cards over heavy tables on mobile (Candidates, Hypothesis check); board columns stack
   vertically on phones. Every page must work at 390px with no sideways scroll.
+
+# ABOUT / README
+- /about is a README-style page (the one exception to the short-copy rule, but
+  scannable: TOC with anchors, headings, short paragraphs, numbered steps). Linked from
+  the header, the sidebar footer and the /review footer. Sections: what this is (built
+  by Sijia He for the Founder's EA application; JD links), the problem, the idea (9-step
+  loop), scoring in plain words (+ link to How it works), user manual per page (Roles &
+  Criteria, Candidates, Pipeline, CEO review, Learning, Sourcing, Reset), weekly rhythm,
+  privacy and fairness, limits / what a real version needs, built with, contact.
+- README.md in the repo mirrors the same content. Keep both in sync (Phase 5 must
+  replace the Sourcing placeholder in both with real steps).
 
 # COPY RULES (write like glot.com)
 - Page header: title of 2–4 words + at most ONE short line under it.
@@ -258,7 +278,8 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
 - /review is a standalone, full-screen, mobile-first route (no sidebar) showing only
   the swipe stack (shared ReviewStack component, same as in-app Quick review).
 - After "Generate shortlist", a popup "Shortlist ready — N candidates" offers
-  "Open review" (new tab) and "Copy link for CEO".
+  "Open review" (new tab) and "Copy link for CEO". If fewer than 5 new candidates were
+  available, it adds one line: "Only N new candidates this week."
 - Links carry state in the URL HASH and contain ONLY: version, role id (or "all"),
   week (YYYY-MM-DD), seeded candidate IDs; the results link adds decision codes
   (a/s/p + skip-reason letter). Never names, evidence or personal data. Decoding
@@ -345,7 +366,8 @@ for me to say "continue".
 - Phase 3 (done): Pipeline page, including Quick review. Follow-ups done: cautious-fit
   ranking, believable source data, /how-it-works page, profile/contact links, JD links.
 - Phase 4 (done): Learning page (also skip-reason counts per role as a rubric signal).
-  Follow-up done: calm restyle + copy cut, CEO /review share links, neutral-50 cautious fit.
+  Follow-up done: calm restyle + copy cut, CEO /review share links, neutral-50 cautious fit,
+  glot.com-matched style, Glot logo, credit line, README-style About, 41 candidates.
 - Phase 5: Sourcing page, evidence extraction and transparent confidence.
 - Phase 6: Welcome modal, tour (incl. the Sourcing example-profile step), Reset,
   About, empty states, mobile pass, then a full end-to-end audit of every

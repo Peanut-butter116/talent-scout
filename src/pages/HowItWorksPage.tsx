@@ -121,7 +121,7 @@ export function HowItWorksPage() {
         <ul className="space-y-2">
           {SOURCES.map((s) => (
             <li key={s.href}>
-              <a href={s.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-teal-700 hover:text-teal-800">
+              <a href={s.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900">
                 {s.label} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
               </a>
             </li>
@@ -237,7 +237,7 @@ function LiveExample() {
             {criteria.map((cr) => {
               const e = c.evidence[cr.id];
               return (
-                <tr key={cr.id} className={cr.id === sliderId ? 'bg-teal-50/60' : ''}>
+                <tr key={cr.id} className={cr.id === sliderId ? 'bg-ink-100' : ''}>
                   <td className="py-2 pr-2 text-ink-800">{cr.name}</td>
                   <td className="py-2 pr-2 text-right tabular-nums">{cr.weight}</td>
                   <td className="py-2 pr-2 text-right tabular-nums">{e ? e.rating : '—'}</td>
@@ -288,7 +288,7 @@ function LiveExample() {
               max={100}
               value={slider.weight}
               onChange={(e) => setCriteria((cs) => setWeight(cs, sliderId, Number(e.target.value)))}
-              className="h-1.5 w-full accent-teal-700"
+              className="h-1.5 w-full accent-ink-900"
               aria-label={`Example weight for ${slider.name}`}
             />
             <span className="w-8 text-right text-sm font-semibold tabular-nums">{slider.weight}</span>

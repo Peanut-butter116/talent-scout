@@ -2,7 +2,8 @@ import { Check, Copy, Link2Off, PartyPopper } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { DemoBadge } from '../components/DemoBadge';
-import { DISCLAIMER } from '../components/Disclaimer';
+import { CreditLine } from '../components/Disclaimer';
+import { BuiltForGlot } from '../components/GlotLogo';
 import { DecisionSummary } from '../components/QuickReview';
 import { ReviewStack } from '../components/ReviewStack';
 import { rankCandidates, type RankedCandidate } from '../lib/scoring';
@@ -42,8 +43,11 @@ export function ReviewPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-ink-50">
-      <div className="flex items-center justify-between px-4 py-3">
-        <span className="text-sm font-semibold text-ink-900">Talent Scout</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="text-sm font-semibold text-ink-900">Talent Scout</span>
+          <BuiltForGlot />
+        </div>
         <DemoBadge />
       </div>
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-4">
@@ -58,7 +62,7 @@ export function ReviewPage() {
           </div>
         )}
       </div>
-      <p className="px-4 pb-4 text-center text-[11px] text-ink-400">{DISCLAIMER}</p>
+      <CreditLine withAbout className="px-4 pb-4 text-center text-[11px]" />
     </div>
   );
 }
@@ -162,7 +166,7 @@ function Done({ link, session, onUndo }: { link: ReviewLink; session: Session; o
 
   return (
     <div className="w-full max-w-sm text-center">
-      <PartyPopper className="mx-auto mb-3 h-6 w-6 text-teal-700" />
+      <PartyPopper className="mx-auto mb-3 h-6 w-6 text-ink-900" />
       <h2 className="text-xl font-semibold text-ink-900">All reviewed</h2>
       <DecisionSummary
         rows={session.order.map((id) => ({ name: name(id), decision: session.decisions[id].decision, reason: session.decisions[id].reason }))}

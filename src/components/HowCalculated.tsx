@@ -14,7 +14,7 @@ export function HowCalculated({ align = 'left' }: { align?: 'left' | 'right' }) 
       <span className="mt-3 block font-medium text-ink-900">Confidence</span>
       <span className="block">How much of the profile is evidenced, and how strongly.</span>
       <span className="mt-3 block">
-        <HowItWorksLink label="How it works" className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:text-teal-800" />
+        <HowItWorksLink label="How it works" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900" />
       </span>
     </InfoTip>
   );

@@ -24,7 +24,7 @@ export function WeightHistory() {
               <div className="text-ink-800">{h.description}</div>
               <div className="mt-0.5 text-xs text-ink-400">
                 {formatTime(h.at)} · {roleTitle(h.roleId)}
-                {h.source === 'learning' && <span className="ml-1.5 font-medium text-teal-700">From Learning</span>}
+                {h.source === 'learning' && <span className="ml-1.5 font-medium text-ink-900">From Learning</span>}
               </div>
             </li>
           ))}

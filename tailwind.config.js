@@ -1,18 +1,38 @@
 /** @type {import('tailwindcss').Config} */
-// Design tokens (see CLAUDE.md → STYLE). Calm, airy, white; near-black ink; one accent (teal).
-// `navy` and `slate` are remapped to neutral greys so the whole app reads as ink-on-white.
+// Design tokens matched to glot.com (see CLAUDE.md → STYLE): white page, #111 ink, warm greys,
+// black pill buttons, Plus Jakarta Sans. `navy`/`slate` map to the warm `ink` scale;
+// `teal` is a muted status green and `rose` is Glot's red — both used for status only.
 const ink = {
-  50: '#f7f7f7',
-  100: '#efefef',
-  200: '#e4e4e4',
-  300: '#cfcfcf',
-  400: '#a3a3a3',
-  500: '#737373',
-  600: '#525252',
-  700: '#3a3a3a',
-  800: '#222222',
+  50: '#f7f7f5',
+  100: '#f2f2f0',
+  200: '#e6e6e3',
+  300: '#cfcfcb',
+  400: '#8a8a86',
+  500: '#6e6e6a',
+  600: '#52524f',
+  700: '#3a3a37',
+  800: '#1a1a19',
   900: '#111111',
   950: '#0a0a0a',
+};
+
+// Status colours only (never decoration): muted green = good, Glot red = flag / not supported.
+const good = {
+  50: '#eef5f0',
+  100: '#dcebe1',
+  300: '#9cc3a8',
+  500: '#4f8a65',
+  600: '#3f7d5a',
+  700: '#2f6b4a',
+  800: '#245a3d',
+  900: '#1c4630',
+};
+const glotRed = {
+  50: '#fbeeee',
+  100: '#f6dcdb',
+  500: '#cb4644',
+  600: '#b83c3a',
+  700: '#9c3230',
 };
 
 export default {
@@ -23,9 +43,12 @@ export default {
         navy: ink,
         slate: ink,
         ink,
+        teal: good,
+        rose: glotRed,
       },
       fontFamily: {
         sans: [
+          '"Plus Jakarta Sans Variable"',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
@@ -39,11 +62,12 @@ export default {
         ],
       },
       letterSpacing: {
-        tightish: '-0.015em',
+        tightish: '-0.02em',
+        display: '-0.035em',
       },
       keyframes: {
         moved: {
-          '0%': { backgroundColor: 'rgb(204 251 241)' },
+          '0%': { backgroundColor: 'rgb(251 243 220)' },
           '100%': { backgroundColor: 'transparent' },
         },
         match: {

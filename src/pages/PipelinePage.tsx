@@ -32,6 +32,7 @@ export function PipelinePage() {
   const [scope, setScope] = useState<Scope>('role');
   const [reviewOpen, setReviewOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [generated, setGenerated] = useState<number | undefined>(undefined);
   const [outreachFor, setOutreachFor] = useState<Candidate | null>(null);
   const [match, setMatch] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -79,6 +80,7 @@ export function PipelinePage() {
       return;
     }
     dispatch({ type: 'GENERATE_SHORTLIST', roleId: scopeRoleId });
+    setGenerated(ids.length);
     setShareOpen(true);
   };
 
@@ -95,7 +97,13 @@ export function PipelinePage() {
         <button className="btn-secondary" onClick={generate} data-tour="generate">
           <Wand2 className="h-4 w-4" /> Generate shortlist
         </button>
-        <button className="btn-ghost" onClick={() => setShareOpen(true)}>
+        <button
+          className="btn-ghost"
+          onClick={() => {
+            setGenerated(undefined);
+            setShareOpen(true);
+          }}
+        >
           <Share2 className="h-4 w-4" /> Share
         </button>
         <div className="sm:ml-auto">
@@ -129,7 +137,7 @@ export function PipelinePage() {
       </div>
 
       {reviewOpen && <QuickReview roleId={scopeRoleId} onClose={() => setReviewOpen(false)} />}
-      {shareOpen && <ShareDialog roleId={scopeRoleId} onClose={() => setShareOpen(false)} />}
+      {shareOpen && <ShareDialog roleId={scopeRoleId} generated={generated} onClose={() => setShareOpen(false)} />}
       {outreachFor && (
         <OutreachModal
           candidate={outreachFor}
@@ -223,7 +231,7 @@ function Board({
                 }}
                 onDragLeave={() => setDragOver(null)}
                 onDrop={(e) => onDrop(e, col.status)}
-                className={`flex w-full flex-col rounded-2xl p-2 transition-colors md:w-64 ${dragOver === col.status ? 'bg-teal-50' : 'bg-ink-50'}`}
+                className={`flex w-full flex-col rounded-2xl p-2 transition-colors md:w-64 ${dragOver === col.status ? 'bg-ink-100' : 'bg-ink-50'}`}
                 data-tour={`col-${col.status}`}
               >
                 <div className={`flex items-center justify-between px-2 pt-1 ${items.length ? 'mb-2' : 'pb-1 md:mb-2 md:pb-0'}`}>
@@ -281,7 +289,7 @@ function BoardCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          {roleTitle && <div className="truncate text-[11px] text-teal-700">{roleTitle}</div>}
+          {roleTitle && <div className="truncate text-[11px] text-ink-500">{roleTitle}</div>}
           <div className="flex items-center gap-1.5">
             <span className="truncate text-sm font-medium text-ink-900">{c.name}</span>
             {c.priority && (
@@ -296,9 +304,9 @@ function BoardCard({
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="text-sm font-semibold tabular-nums text-ink-900">{fit}</span>
           <div className="flex items-center gap-0.5">
-            <ProfileLink candidate={c} iconOnly className="rounded-full p-1 text-ink-300 hover:text-teal-700" />
+            <ProfileLink candidate={c} iconOnly className="rounded-full p-1 text-ink-300 hover:text-ink-900" />
             <button
-              className="rounded-full p-1 text-ink-300 hover:text-teal-700"
+              className="rounded-full p-1 text-ink-300 hover:text-ink-900"
               onClick={() => onDraft(c)}
               aria-label={`Contact ${c.name}`}
               title="Contact"
@@ -367,9 +375,9 @@ function BoardCard({
           {c.status === 'booked' && <CardBtn primary onClick={() => onMove(c, 'done')}>Chat done</CardBtn>}
           {c.status === 'done' &&
             (feedbackLogged ? (
-              <span className="text-xs text-teal-700">Feedback logged</span>
+              <span className="text-xs text-ink-500">Feedback logged</span>
             ) : (
-              <Link to={`/learning?log=${c.id}`} className="rounded-full bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800" data-tour="log-feedback">
+              <Link to={`/learning?log=${c.id}`} className="rounded-full bg-ink-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-ink-700" data-tour="log-feedback">
                 Log feedback
               </Link>
             ))}
@@ -443,7 +451,7 @@ function SourceTable({ rows }: { rows: ReturnType<typeof resultsBySource> }) {
                 <td className="py-3 pr-3 text-ink-900">
                   {r.source}
                   {(r.source === 'LinkedIn direct' || r.source === 'Network referral') && (
-                    <span className="ml-2 text-xs text-teal-700">Direct</span>
+                    <span className="ml-2 text-xs font-medium text-ink-900">Direct</span>
                   )}
                 </td>
                 <td className="py-3 pr-3 text-right tabular-nums text-ink-600">{r.contacted}</td>
@@ -475,7 +483,7 @@ function WeeklyRhythm() {
           <li key={s.day} className="flex gap-3 text-sm">
             <span className="w-16 shrink-0 font-medium text-ink-900">{s.day}</span>
             <span className="text-ink-500">
-              <span className={`mr-1.5 text-xs font-medium ${s.who === 'CEO' ? 'text-teal-700' : 'text-ink-400'}`}>{s.who}</span>
+              <span className={`mr-1.5 text-xs font-medium ${s.who === 'CEO' ? 'text-ink-900' : 'text-ink-400'}`}>{s.who}</span>
               {s.text}
             </span>
           </li>
@@ -489,7 +497,7 @@ function MatchMoment({ name }: { name: string }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4" role="status" aria-live="polite">
       <div className="animate-match flex items-center gap-3 rounded-full bg-ink-900 py-2.5 pl-2.5 pr-5 text-white shadow-2xl">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-500 text-ink-950">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-ink-900">
           <Handshake className="h-4 w-4" />
         </div>
         <div className="text-sm">

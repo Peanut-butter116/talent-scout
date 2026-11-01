@@ -91,7 +91,7 @@ function DoneSummary({ onClose, onUndo }: { onClose: () => void; onUndo?: () => 
 
   return (
     <div className="w-full max-w-sm text-center">
-      <PartyPopper className="mx-auto mb-3 h-6 w-6 text-teal-700" />
+      <PartyPopper className="mx-auto mb-3 h-6 w-6 text-ink-900" />
       <h3 className="text-xl font-semibold text-ink-900">Done for this week</h3>
       {week.length === 0 ? (
         <p className="mt-1 text-sm text-ink-500">Nothing to review yet.</p>

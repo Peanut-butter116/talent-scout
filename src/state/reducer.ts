@@ -18,8 +18,8 @@ import type {
 } from '../types';
 
 /** Bump both whenever the saved-state shape changes, so old saved state resets cleanly. */
-export const STATE_VERSION = 4;
-export const STORAGE_KEY = 'talent-scout:v4';
+export const STATE_VERSION = 5;
+export const STORAGE_KEY = 'talent-scout:v5';
 
 export interface AppState {
   version: number;

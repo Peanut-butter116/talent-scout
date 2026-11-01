@@ -161,11 +161,20 @@ describe('cautious fit', () => {
     expect(alone.cautiousFit).toBeCloseTo(all.cautiousFit);
   });
 
-  it('Alexis Brandt (thin evidence) is not top 3 by default, but is on raw fit', () => {
+  it('thin profiles (Alexis Brandt, Yuki Brannigan) rank high on raw fit but not by default', () => {
     const cautious = rankCandidates(SEED_CANDIDATES, ai).map((r) => r.candidate.id);
     const raw = rankCandidates(SEED_CANDIDATES, ai, 'raw').map((r) => r.candidate.id);
-    expect(cautious.indexOf('c-alexis')).toBeGreaterThanOrEqual(3);
-    expect(raw.indexOf('c-alexis')).toBeLessThan(3);
+    for (const id of ['c-alexis', 'c-yuki']) {
+      expect(cautious.indexOf(id)).toBeGreaterThanOrEqual(3);
+      expect(raw.indexOf(id)).toBeLessThan(cautious.indexOf(id));
+    }
+  });
+
+  it('every role has at least 5 new candidates for a shortlist', () => {
+    for (const r of SEED_ROLES) {
+      const fresh = rankCandidates(SEED_CANDIDATES, r).filter((x) => x.candidate.status === 'new' && !x.mustHaves.flagged);
+      expect(fresh.length).toBeGreaterThanOrEqual(5);
+    }
   });
 
   it('tags candidates under 40% coverage as needing more evidence', () => {
