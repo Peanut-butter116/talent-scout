@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SEED_CANDIDATES } from '../data/candidates';
 import { SEED_ROLES } from '../data/roles';
 import type { Candidate, Role } from '../types';
-import { checkMustHaves, confidenceFor, rankCandidates, scoreCandidate } from './scoring';
+import { cautiousFit, checkMustHaves, confidenceFor, rankCandidates, roleAverageFit, scoreCandidate } from './scoring';
 import { setWeight } from './weights';
 
 const role: Role = {
@@ -141,5 +141,41 @@ describe('rankCandidates', () => {
     expect(after).not.toEqual(before);
     expect(after.indexOf('c-sam')).toBeLessThan(before.indexOf('c-sam') + 1);
     expect(after.indexOf('c-jordan')).toBeLessThan(before.indexOf('c-jordan'));
+  });
+});
+
+describe('cautious fit', () => {
+  const ai = SEED_ROLES.find((r) => r.id === 'ai-eng')!;
+
+  it('equals raw fit at full coverage and pulls thin profiles towards the role average', () => {
+    const full = { fit: 90, coverage: 100 } as Parameters<typeof cautiousFit>[0];
+    expect(cautiousFit(full, 60)).toBeCloseTo(90);
+    const thin = { fit: 90, coverage: 25 } as Parameters<typeof cautiousFit>[0];
+    expect(cautiousFit(thin, 60)).toBeCloseTo(0.25 * 90 + 0.75 * 60);
+  });
+
+  it('Alexis Brandt (thin evidence) is no longer top 3 by default, but is on raw fit', () => {
+    const cautious = rankCandidates(SEED_CANDIDATES, ai).map((r) => r.candidate.id);
+    const raw = rankCandidates(SEED_CANDIDATES, ai, 'raw').map((r) => r.candidate.id);
+    expect(cautious.indexOf('c-alexis')).toBeGreaterThanOrEqual(3);
+    expect(raw.indexOf('c-alexis')).toBeLessThan(3);
+  });
+
+  it('tags candidates under 40% coverage as needing more evidence', () => {
+    const ranked = rankCandidates(SEED_CANDIDATES, ai);
+    const alexis = ranked.find((r) => r.candidate.id === 'c-alexis')!;
+    const sam = ranked.find((r) => r.candidate.id === 'c-sam')!;
+    expect(alexis.needsMoreEvidence).toBe(true);
+    expect(sam.needsMoreEvidence).toBe(false);
+  });
+
+  it('never changes raw fit', () => {
+    for (const r of rankCandidates(SEED_CANDIDATES, ai)) {
+      expect(r.score.fit).toBe(scoreCandidate(r.candidate, ai).fit);
+    }
+  });
+
+  it('role average ignores candidates with no evidence', () => {
+    expect(roleAverageFit([{ fit: 80 }, { fit: null }, { fit: 60 }] as Parameters<typeof roleAverageFit>[0])).toBe(70);
   });
 });

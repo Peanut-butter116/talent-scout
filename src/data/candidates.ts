@@ -76,14 +76,15 @@ export const SEED_CANDIDATES: Candidate[] = [
     source: 'Network referral',
     status: 'new',
     evidence: {
-      ai_model: ev(3, 'weak', 'Mostly serves and quantises models others trained'),
+      ai_model: ev(4, 'weak', 'Trained a small streaming VAD model; mostly serves larger models'),
       ai_rt: ev(5, 'strong', 'Cut p95 inference latency from 900ms to 140ms on live video'),
-      ai_pedigree: ev(3, 'weak', 'Mid-size infra company; no research lab or early AI team'),
+      ai_pedigree: ev(2, 'weak', 'Mid-size infra company; no research lab or early AI team'),
       ai_judgement: ev(4, 'strong', 'Led a no-regrets migration plan with explicit rollback'),
       ai_builder: ev(4, 'strong', 'Built the team\'s GPU batching server, now open source'),
       ai_sharp: ev(3, 'weak', 'Referrer describes as "quietly thorough"'),
       ai_ego: ev(4, 'strong', 'Referrer: reverted own design after a junior\'s benchmark'),
     },
+    contactNote: 'Referred by a former teammate — mention the referral.',
     mustHaves: {},
   },
   {
@@ -112,7 +113,7 @@ export const SEED_CANDIDATES: Candidate[] = [
     headline: 'Software Engineer, payments backend',
     employer: 'Ostrava Pay',
     roleId: 'fullstack',
-    source: 'Agency',
+    source: 'Inbound',
     status: 'done',
     shortlistedAt: '2026-10-13T09:00:00.000Z',
     contactedAt: '2026-10-14T10:00:00.000Z',
@@ -201,6 +202,7 @@ export const SEED_CANDIDATES: Candidate[] = [
       fs_sharp: ev(4, 'strong', 'Writes crisp bug reports with root cause'),
       fs_ego: ev(4, 'weak', 'Referrer says "takes feedback well"'),
     },
+    contactNote: 'Referred by a charity they built a tool for.',
     mustHaves: {},
   },
 
@@ -211,7 +213,7 @@ export const SEED_CANDIDATES: Candidate[] = [
     headline: 'VP Engineering',
     employer: 'Orbital Freight',
     roleId: 'head-eng',
-    source: 'Agency',
+    source: 'Network referral',
     status: 'done',
     shortlistedAt: '2026-10-06T09:00:00.000Z',
     contactedAt: '2026-10-07T10:00:00.000Z',
@@ -224,6 +226,7 @@ export const SEED_CANDIDATES: Candidate[] = [
       he_sharp: ev(3, 'weak', 'Polished keynote-style profile'),
       he_ego: ev(2, 'weak', 'Profile is mostly about personal leadership awards'),
     },
+    contactNote: 'Referred by an investor contact.',
     mustHaves: {},
   },
   {
@@ -245,6 +248,7 @@ export const SEED_CANDIDATES: Candidate[] = [
       he_sharp: ev(4, 'weak', 'Clear, short RFCs on their public engineering blog'),
       he_ego: ev(4, 'strong', 'Referrer: hands credit to the team in every launch post'),
     },
+    contactNote: 'Referred by an advisor; open to a hands-on role.',
     mustHaves: {},
   },
   {
@@ -358,6 +362,7 @@ export const SEED_CANDIDATES: Candidate[] = [
       bo_sharp: ev(4, 'weak', 'Asks good questions, per referrer'),
       bo_ego: ev(4, 'weak', 'Referrer: "first to help, last to take credit"'),
     },
+    contactNote: 'Referred by a supplier; prefers email over calls.',
     mustHaves: {},
   },
 
@@ -399,6 +404,7 @@ export const SEED_CANDIDATES: Candidate[] = [
       tp_sharp: ev(3, 'weak', 'Writes plainly; few samples to judge'),
       tp_ego: ev(4, 'weak', 'Credits hiring managers for wins'),
     },
+    contactNote: 'Referred by a founder they hired for.',
     mustHaves: { rtw: 'yes' },
   },
   {

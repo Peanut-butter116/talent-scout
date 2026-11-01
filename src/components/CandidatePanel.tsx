@@ -1,5 +1,9 @@
 import { AlertTriangle, ArrowRight, CircleHelp, ListPlus, PhoneCall } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { HowCalculated } from './HowCalculated';
+import { OutreachModal } from './OutreachModal';
+import { ProfileActions } from './ProfileActions';
 import { STATUS_LABEL } from '../lib/pipeline';
 import { uncertainties, type RankedCandidate } from '../lib/scoring';
 import { useAppState } from '../state/AppState';
@@ -18,6 +22,7 @@ export function CandidatePanel({
   onClose: () => void;
 }) {
   const { dispatch } = useAppState();
+  const [contacting, setContacting] = useState(false);
   if (!ranked) return null;
   const { candidate: c, score, mustHaves } = ranked;
   const { missing, weak } = uncertainties(c, role);
@@ -40,6 +45,9 @@ export function CandidatePanel({
           <p className="mt-0.5 text-xs text-slate-500">
             Rank #{ranked.rank} for {role.title} · Source: {c.source}
           </p>
+          <div className="mt-3">
+            <ProfileActions candidate={c} onContact={() => setContacting(true)} size="sm" />
+          </div>
         </>
       }
       footer={
@@ -76,9 +84,26 @@ export function CandidatePanel({
           <ConfidenceChip confidence={score.confidence} />
         </Stat>
       </div>
-      <p className="mt-2 text-xs text-slate-500">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <span>
+          Ranking score (cautious fit): <strong className="tabular-nums text-navy-900">{Math.round(ranked.cautiousFit)}%</strong>
+        </span>
+        <HowCalculated align="right" />
+      </div>
+      <p className="mt-1 text-xs text-slate-500">
         Fit uses only criteria with evidence. Missing evidence lowers confidence, never fit.
       </p>
+      {ranked.needsMoreEvidence && (
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <span className="font-medium">Needs more evidence.</span> Find out more before contacting — only{' '}
+          {Math.round(score.coverage)}% of the weight is evidenced.
+        </div>
+      )}
+      {c.contactNote && (
+        <p className="mt-3 text-sm text-slate-600">
+          <span className="font-medium text-navy-900">Contact note:</span> {c.contactNote}
+        </p>
+      )}
 
       {mustHaves.checks.length > 0 && (
         <section className="mt-6">
@@ -158,6 +183,7 @@ export function CandidatePanel({
           </ul>
         )}
       </section>
+      {contacting && <OutreachModal candidate={c} role={role} onClose={() => setContacting(false)} />}
     </SidePanel>
   );
 }

@@ -83,29 +83,77 @@ export interface RankedCandidate {
   candidate: Candidate;
   score: CandidateScore;
   mustHaves: MustHaveResult;
+  /**
+   * Ranking score: raw fit blended towards the role average by how much is unknown.
+   * cautious = coverage × fit + (1 − coverage) × roleAverage. Equals fit at full coverage.
+   */
+  cautiousFit: number;
+  /** Coverage below NEEDS_EVIDENCE_COVERAGE → find out more before contacting. */
+  needsMoreEvidence: boolean;
   rank: number;
 }
 
-/** Ranks candidates for one role: fit desc (no evidence last), then coverage, then name. */
-export function rankCandidates(candidates: Candidate[], role: Role): RankedCandidate[] {
-  return candidates
+export type SortMode = 'cautious' | 'raw';
+
+/** Below this coverage (%), a candidate is tagged "Needs more evidence". */
+export const NEEDS_EVIDENCE_COVERAGE = 40;
+
+/** Average raw fit of the role's candidates that have any evidence. */
+export function roleAverageFit(scores: CandidateScore[]): number {
+  const fits = scores.map((s) => s.fit).filter((f): f is number => f !== null);
+  return fits.length ? fits.reduce((a, b) => a + b, 0) / fits.length : 0;
+}
+
+export function cautiousFit(score: CandidateScore, roleAverage: number): number {
+  const cov = score.coverage / 100;
+  return cov * (score.fit ?? 0) + (1 - cov) * roleAverage;
+}
+
+/**
+ * Ranks candidates for one role. Default sort is cautious fit, so thin profiles don't float
+ * to the top on a couple of good ratings. Raw sort orders by fit alone.
+ */
+export function rankCandidates(
+  candidates: Candidate[],
+  role: Role,
+  sort: SortMode = 'cautious',
+): RankedCandidate[] {
+  const scored = candidates
     .filter((c) => c.roleId === role.id)
-    .map((candidate) => ({
+    .map((candidate) => ({ candidate, score: scoreCandidate(candidate, role) }));
+  const avg = roleAverageFit(scored.map((x) => x.score));
+  return scored
+    .map(({ candidate, score }) => ({
       candidate,
-      score: scoreCandidate(candidate, role),
+      score,
       mustHaves: checkMustHaves(candidate, role),
+      cautiousFit: cautiousFit(score, avg),
+      needsMoreEvidence: score.coverage < NEEDS_EVIDENCE_COVERAGE,
       rank: 0,
     }))
-    .sort(compareRanked)
+    .sort(sort === 'raw' ? compareRaw : compareCautious)
     .map((r, i) => ({ ...r, rank: i + 1 }));
 }
 
-export function compareRanked(a: RankedCandidate, b: RankedCandidate): number {
+function tieBreak(a: RankedCandidate, b: RankedCandidate): number {
+  if (b.score.coverage !== a.score.coverage) return b.score.coverage - a.score.coverage;
+  return a.candidate.name.localeCompare(b.candidate.name);
+}
+
+export function compareCautious(a: RankedCandidate, b: RankedCandidate): number {
+  // Candidates with no evidence at all go last regardless of the blended score.
+  const ea = a.score.fit === null ? 1 : 0;
+  const eb = b.score.fit === null ? 1 : 0;
+  if (ea !== eb) return ea - eb;
+  if (b.cautiousFit !== a.cautiousFit) return b.cautiousFit - a.cautiousFit;
+  return tieBreak(a, b);
+}
+
+export function compareRaw(a: RankedCandidate, b: RankedCandidate): number {
   const fa = a.score.fit ?? -1;
   const fb = b.score.fit ?? -1;
   if (fb !== fa) return fb - fa;
-  if (b.score.coverage !== a.score.coverage) return b.score.coverage - a.score.coverage;
-  return a.candidate.name.localeCompare(b.candidate.name);
+  return tieBreak(a, b);
 }
 
 /** Criteria the candidate has no evidence for, or only weak evidence — "what's uncertain". */

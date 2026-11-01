@@ -16,6 +16,8 @@ import {
 import { useCallback, useEffect, useMemo, useState, type DragEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState';
+import { HowItWorksLink } from '../components/HowItWorksLink';
+import { ProfileActions } from '../components/ProfileActions';
 import { OutreachModal } from '../components/OutreachModal';
 import { PageHeader } from '../components/PageHeader';
 import { QuickReview } from '../components/QuickReview';
@@ -103,9 +105,12 @@ export function PipelinePage() {
         title="Pipeline"
         subtitle="Generate this week's shortlist, review it in a couple of minutes, then track outreach and coffee chats."
         actions={
-          <button className="btn-teal" onClick={generate} data-tour="generate">
-            <Wand2 className="h-4 w-4" /> Generate this week's shortlist
-          </button>
+          <>
+            <HowItWorksLink />
+            <button className="btn-teal" onClick={generate} data-tour="generate">
+              <Wand2 className="h-4 w-4" /> Generate this week's shortlist
+            </button>
+          </>
         }
       />
       <RoleSelector />
@@ -193,7 +198,7 @@ function KpiStrip({ kpis }: { kpis: ReturnType<typeof computeKpis> }) {
     {
       label: 'Reply rate',
       value: kpis.replyRate === null ? '—' : `${Math.round(kpis.replyRate * 100)}%`,
-      sub: `${kpis.replied} of ${kpis.contacted}`,
+      sub: `(${kpis.replied} of ${kpis.contacted})`,
       icon: MessageSquareReply,
     },
     { label: 'Chats booked', value: kpis.chatsBooked, icon: CalendarCheck },
@@ -358,6 +363,10 @@ function BoardCard({
         )}
       </div>
 
+      {item.needsMoreEvidence && ['suggested', 'approved'].includes(c.status) && (
+        <p className="mt-1.5 text-xs text-amber-700">Needs more evidence — find out more before contacting.</p>
+      )}
+
       {c.status === 'done' && (
         <div className="mt-2 rounded-md bg-slate-50 px-2 py-1.5 text-xs text-slate-600">
           <span className="font-medium">Next step:</span> hand to formal pipeline (Ashby — not connected in demo)
@@ -420,6 +429,9 @@ function BoardCard({
               <Undo2 className="h-3 w-3" /> Restore
             </CardBtn>
           )}
+          <div className="w-full">
+            <ProfileActions candidate={c} onContact={() => onDraft(c)} size="sm" />
+          </div>
           <label className="ml-auto">
             <span className="sr-only">Move {c.name} to</span>
             <select
@@ -459,20 +471,20 @@ function CardBtn({ children, onClick, primary }: { children: React.ReactNode; on
 
 function SourceTable({ rows }: { rows: ReturnType<typeof resultsBySource> }) {
   const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '—');
+  const withN = (a: number, b: number) => (b ? `${pct(a, b)} (${a} of ${b})` : '—');
   return (
     <section className="card min-w-0 p-5 lg:col-span-3" aria-labelledby="sources-h">
       <h2 id="sources-h" className="font-semibold text-navy-900">Results by source</h2>
       <p className="mt-0.5 text-sm text-slate-500">Is direct sourcing beating agencies? Counted across all roles.</p>
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[480px] text-sm">
+        <table className="w-full min-w-[520px] text-sm">
           <thead className="text-left text-xs uppercase tracking-wider text-slate-500">
             <tr className="border-b border-slate-200">
               <th className="py-2 pr-3 font-medium">Source</th>
               <th className="py-2 pr-3 text-right font-medium">Contacted</th>
               <th className="py-2 pr-3 text-right font-medium">Replied</th>
               <th className="py-2 pr-3 text-right font-medium">Chats</th>
-              <th className="py-2 pr-3 text-right font-medium">Progressed</th>
-              <th className="py-2 text-right font-medium">Progress rate</th>
+              <th className="py-2 text-right font-medium">Progressed</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -485,16 +497,17 @@ function SourceTable({ rows }: { rows: ReturnType<typeof resultsBySource> }) {
                   )}
                 </td>
                 <td className="py-2.5 pr-3 text-right tabular-nums">{r.contacted}</td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">{r.replied}</td>
+                <td className="py-2.5 pr-3 text-right tabular-nums whitespace-nowrap">{withN(r.replied, r.contacted)}</td>
                 <td className="py-2.5 pr-3 text-right tabular-nums">{r.chats}</td>
-                <td className="py-2.5 pr-3 text-right tabular-nums">{r.progressed}</td>
-                <td className="py-2.5 text-right font-semibold tabular-nums text-navy-900">{pct(r.progressed, r.contacted)}</td>
+                <td className="py-2.5 text-right font-semibold tabular-nums whitespace-nowrap text-navy-900">{withN(r.progressed, r.contacted)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-xs text-slate-500">Progress rate = chats marked “Progress” ÷ people contacted. Fictional data; small numbers.</p>
+      <p className="mt-3 text-xs text-slate-500">
+        Demo data. Small samples — indicative only. Percentages are of people contacted; “Progressed” = chat marked Progress.
+      </p>
     </section>
   );
 }

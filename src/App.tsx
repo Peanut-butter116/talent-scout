@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { AboutPage } from './pages/AboutPage';
 import { CandidatesPage } from './pages/CandidatesPage';
+import { HowItWorksPage } from './pages/HowItWorksPage';
 import { LearningPage } from './pages/LearningPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PipelinePage } from './pages/PipelinePage';
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="pipeline" element={<PipelinePage />} />
         <Route path="learning" element={<LearningPage />} />
         <Route path="about" element={<AboutPage />} />
+        <Route path="how-it-works" element={<HowItWorksPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

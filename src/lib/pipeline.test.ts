@@ -11,6 +11,11 @@ describe('pickShortlist', () => {
     for (const id of ids) expect(SEED_CANDIDATES.find((c) => c.id === id)!.status).toBe('new');
   });
 
+  it('uses cautious fit, so thin profiles are not picked first', () => {
+    const ids = pickShortlist(SEED_CANDIDATES, SEED_ROLES, 'ai-eng', 2);
+    expect(ids).not.toContain('c-alexis');
+  });
+
   it('respects the selected role', () => {
     const ids = pickShortlist(SEED_CANDIDATES, SEED_ROLES, 'ai-eng');
     expect(ids.length).toBeGreaterThan(0);
@@ -39,8 +44,11 @@ describe('kpis and sources', () => {
     const rows = resultsBySource(SEED_CANDIDATES, SEED_CHATS);
     const direct = rows.find((r) => r.source === 'LinkedIn direct')!;
     const agency = rows.find((r) => r.source === 'Agency')!;
-    expect(direct.progressed).toBeGreaterThan(agency.progressed);
-    expect(agency.contacted).toBeGreaterThan(0);
+    const rate = (r: typeof direct) => r.progressed / r.contacted;
+    expect(rate(direct)).toBeGreaterThan(rate(agency));
+    // Believable, not extreme: agency still progresses someone.
+    expect(agency.progressed).toBeGreaterThanOrEqual(1);
+    expect(agency.contacted).toBeGreaterThanOrEqual(5);
   });
 
   it('week starts on Monday', () => {

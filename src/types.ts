@@ -34,6 +34,8 @@ export interface Role {
   summary: string;
   criteria: Criterion[];
   mustHaves: MustHave[];
+  /** Glot's public job ad for this role (opens in a new tab). */
+  jdUrl?: string;
 }
 
 export type EvidenceStrength = 'strong' | 'weak';
@@ -75,6 +77,13 @@ export interface Candidate {
   /** Candidate replied to outreach (while in Contacted). Booked/done imply replied. */
   replied?: boolean;
   skipReason?: SkipReason;
+  /**
+   * Public profile link. Only set for profiles a user adds via Sourcing (validated
+   * https://www.linkedin.com/in/... URLs). Seeded demo candidates never have one.
+   */
+  profileUrl?: string;
+  /** Free-text note for whoever reaches out, e.g. who referred them. */
+  contactNote?: string;
 }
 
 export type SkipReason = 'not_enough_evidence' | 'wrong_seniority' | 'missing_skill' | 'other';

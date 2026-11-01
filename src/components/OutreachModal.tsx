@@ -1,4 +1,5 @@
-import { Check, Copy, MailX, X } from 'lucide-react';
+import { Check, Copy, ExternalLink, MailX, X } from 'lucide-react';
+import { DEMO_PROFILE_TOOLTIP } from '../lib/profile';
 import { useEffect, useState } from 'react';
 import { draftOutreach } from '../lib/pipeline';
 import type { Candidate, Role } from '../types';
@@ -18,9 +19,14 @@ export function OutreachModal({
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    // Capture phase so Escape closes only this draft, not a panel or review underneath.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopImmediatePropagation();
+      onClose();
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
   }, [onClose]);
 
   const copy = async () => {
@@ -50,6 +56,11 @@ export function OutreachModal({
             <MailX className="h-4 w-4 shrink-0" />
             Draft only — not sent. Talent Scout never sends messages.
           </div>
+          {candidate.contactNote && (
+            <p className="mb-3 text-sm text-slate-600">
+              <span className="font-medium text-navy-900">Contact note:</span> {candidate.contactNote}
+            </p>
+          )}
           <textarea
             className="input h-64 resize-y font-[inherit] leading-relaxed"
             value={text}
@@ -60,8 +71,19 @@ export function OutreachModal({
         <div className="flex flex-col-reverse gap-2 border-t border-slate-200 px-5 py-4 sm:flex-row sm:justify-end">
           <button className="btn-secondary" onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? 'Copied' : 'Copy text'}
+            {copied ? 'Copied' : 'Copy message'}
           </button>
+          {candidate.profileUrl ? (
+            <a className="btn-secondary" href={candidate.profileUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4" /> Open profile to message
+            </a>
+          ) : (
+            <span title={DEMO_PROFILE_TOOLTIP} className="inline-flex">
+              <button className="btn-secondary w-full" disabled>
+                <ExternalLink className="h-4 w-4" /> Open profile to message
+              </button>
+            </span>
+          )}
           {onMarkContacted && (
             <button
               className="btn-primary"

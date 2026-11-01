@@ -9,7 +9,7 @@ import {
   type SkipReason,
   type SourceChannel,
 } from '../types';
-import { rankCandidates, strongestEvidence, type RankedCandidate } from './scoring';
+import { compareCautious, rankCandidates, strongestEvidence, type RankedCandidate } from './scoring';
 
 export const PIPELINE_COLUMNS: { status: PipelineStatus; label: string }[] = [
   { status: 'suggested', label: 'Suggested' },
@@ -40,7 +40,7 @@ export function hasReplied(c: Candidate): boolean {
 export const SHORTLIST_SIZE = 5;
 
 /**
- * Picks the top candidates who haven't been shortlisted or contacted yet.
+ * Picks the top candidates (by cautious fit) who haven't been shortlisted or contacted yet.
  * Must-have "Unknown" never excludes; only an explicit "No" does.
  * Pass roleId = null for all roles.
  */
@@ -55,7 +55,7 @@ export function pickShortlist(
     .flatMap((r) => rankCandidates(candidates, r));
   return pool
     .filter((r) => r.candidate.status === 'new' && !r.mustHaves.flagged && r.score.fit !== null)
-    .sort((a, b) => (b.score.fit ?? 0) - (a.score.fit ?? 0) || b.score.coverage - a.score.coverage)
+    .sort(compareCautious)
     .slice(0, size)
     .map((r) => r.candidate.id);
 }
@@ -171,7 +171,7 @@ export function reviewDeck(
     .filter((r) => roleId === null || r.id === roleId)
     .flatMap((r) => rankCandidates(candidates, r))
     .filter((r) => r.candidate.status === 'suggested')
-    .sort((a, b) => (b.score.fit ?? -1) - (a.score.fit ?? -1))
+    .sort(compareCautious)
     .slice(0, remaining);
 }
 

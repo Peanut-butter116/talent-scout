@@ -7,6 +7,7 @@ import type { Role } from '../types';
 export const SEED_ROLES: Role[] = [
   {
     id: 'ai-eng',
+    jdUrl: 'https://jobs.ashbyhq.com/glot/f529d4cb-dec4-4db8-987b-acc64bec9782',
     title: 'Founding AI Engineer',
     summary:
       'Owns AI direction and model architecture, and sits on the senior leadership committee.',
@@ -28,6 +29,7 @@ export const SEED_ROLES: Role[] = [
   },
   {
     id: 'fullstack',
+    jdUrl: 'https://jobs.ashbyhq.com/glot/e1dfbeef-d771-4cc2-9d32-404a9c7311d6',
     title: 'Full Stack Engineer',
     summary: 'Versatile across AI, backend and frontend, with a lean towards backend.',
     criteria: [
@@ -54,6 +56,7 @@ export const SEED_ROLES: Role[] = [
   },
   {
     id: 'head-eng',
+    jdUrl: 'https://jobs.ashbyhq.com/glot/1efd6395-c9d0-44e3-8195-4390745161f2',
     title: 'Head of Engineering',
     summary:
       'Ships impactful products: hands-on early, then scales the architecture to a team. First-principles; makes the complex simple.',
@@ -80,6 +83,7 @@ export const SEED_ROLES: Role[] = [
   },
   {
     id: 'bizops',
+    jdUrl: 'https://jobs.ashbyhq.com/glot/c1278e4e-078f-47c0-920d-2ce93234350c',
     title: 'Business Operations',
     summary:
       'Generalist working with the Chief of Staff on systems, suppliers, onboarding, registers and decision support.',
@@ -109,6 +113,7 @@ export const SEED_ROLES: Role[] = [
   },
   {
     id: 'talent',
+    jdUrl: 'https://jobs.ashbyhq.com/glot/ebd0691d-9abd-46b2-9ae5-5eaa3cc807f8',
     title: 'Talent Partner',
     summary:
       'Owns hiring end to end: sourcing, screening and running the pipeline in Ashby.',

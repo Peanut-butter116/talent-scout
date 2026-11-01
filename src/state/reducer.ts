@@ -16,8 +16,9 @@ import type {
   WeightChange,
 } from '../types';
 
-export const STATE_VERSION = 2;
-export const STORAGE_KEY = 'talent-scout:v2';
+/** Bump both whenever the saved-state shape changes, so old saved state resets cleanly. */
+export const STATE_VERSION = 3;
+export const STORAGE_KEY = 'talent-scout:v3';
 
 export interface AppState {
   version: number;

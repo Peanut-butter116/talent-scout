@@ -15,6 +15,10 @@ export function Layout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   useEffect(() => setOpen(false), [location.pathname]);
+  // New page → start at the top (unless jumping to an anchor).
+  useEffect(() => {
+    if (!location.hash) window.scrollTo(0, 0);
+  }, [location.pathname, location.hash]);
 
   return (
     <div className="min-h-screen lg:flex">

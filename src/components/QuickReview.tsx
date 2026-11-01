@@ -14,6 +14,8 @@ import { strongestEvidence, type RankedCandidate } from '../lib/scoring';
 import { useAppState } from '../state/AppState';
 import { SKIP_REASONS, type ReviewDecision, type Role, type SkipReason } from '../types';
 import { ConfidenceChip, StrengthChip } from './Chips';
+import { OutreachModal } from './OutreachModal';
+import { ProfileActions } from './ProfileActions';
 import { FitBar, RatingDots } from './FitBar';
 
 const SWIPE_X = 110;
@@ -31,6 +33,7 @@ export function QuickReview({ roleId, onClose }: { roleId: string | null; onClos
   const [flipped, setFlipped] = useState(false);
   const [cardKey, setCardKey] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
+  const [contactId, setContactId] = useState<string | null>(null);
   const cardRef = useRef<CardHandle>(null);
 
   const deck = useMemo(() => {
@@ -85,6 +88,8 @@ export function QuickReview({ roleId, onClose }: { roleId: string | null; onClos
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (contactId || (t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)))) return;
       if (e.key === 'Escape') {
         if (askReasonFor) cancelSkip();
         else onClose();
@@ -109,7 +114,7 @@ export function QuickReview({ roleId, onClose }: { roleId: string | null; onClos
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [askReasonFor, current, undo, onClose, commit]);
+  }, [askReasonFor, current, undo, onClose, commit, contactId]);
 
   const total = sessionCount + deck.length + (askReasonFor ? 1 : 0);
   const position = Math.min(total, sessionCount + 1);
@@ -159,11 +164,18 @@ export function QuickReview({ roleId, onClose }: { roleId: string | null; onClos
                 flipped={flipped}
                 onFlip={() => setFlipped((f) => !f)}
                 onDecide={onDecide}
+                onContact={() => setContactId(current.candidate.id)}
               />
             </>
           )}
           {done && <DoneSummary onClose={onClose} />}
         </div>
+        {contactId && (() => {
+          const cand = state.candidates.find((c) => c.id === contactId);
+          return cand ? (
+            <OutreachModal candidate={cand} role={roleOf(cand.roleId)} onClose={() => setContactId(null)} />
+          ) : null;
+        })()}
 
         {current && (
           <div className="border-t border-slate-200 bg-white px-5 pt-4 pb-5">
@@ -225,8 +237,9 @@ const SwipeCard = forwardRef<
     flipped: boolean;
     onFlip: () => void;
     onDecide: (d: ReviewDecision) => void;
+    onContact: () => void;
   }
->(function SwipeCard({ item, role, showRole, flipped, onFlip, onDecide }, ref) {
+>(function SwipeCard({ item, role, showRole, flipped, onFlip, onDecide, onContact }, ref) {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [exit, setExit] = useState<ReviewDecision | null>(null);
@@ -349,8 +362,13 @@ const SwipeCard = forwardRef<
                 ))}
               </ul>
             )}
+            {item.needsMoreEvidence && (
+              <div className="mt-4 rounded-lg border border-amber-200 px-3 py-2 text-sm text-amber-800">
+                <span className="font-medium">Needs more evidence</span> — find out more before contacting.
+              </div>
+            )}
             {uncertainty && (
-              <div className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              <div className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
                 <span className="font-medium">Biggest uncertainty: </span>
                 {uncertainty}
               </div>
@@ -379,6 +397,9 @@ const SwipeCard = forwardRef<
                 );
               })}
             </ul>
+            <div className="mt-3 border-t border-slate-100 pt-3">
+              <ProfileActions candidate={c} onContact={onContact} size="sm" />
+            </div>
           </>
         )}
         <button

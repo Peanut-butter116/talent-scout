@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { analyzeRole, type CriterionAnalysis } from '../lib/analysis';
-import { rankCandidates } from '../lib/scoring';
+import { rankCandidates, type SortMode } from '../lib/scoring';
 import type { Role } from '../types';
 import { useAppState } from './AppState';
 
@@ -12,7 +12,7 @@ export function useRoleAnalysis(role: Role): CriterionAnalysis[] {
   );
 }
 
-export function useRanked(role: Role) {
+export function useRanked(role: Role, sort: SortMode = 'cautious') {
   const { state } = useAppState();
-  return useMemo(() => rankCandidates(state.candidates, role), [state.candidates, role]);
+  return useMemo(() => rankCandidates(state.candidates, role, sort), [state.candidates, role, sort]);
 }
