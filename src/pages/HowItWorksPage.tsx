@@ -235,7 +235,7 @@ function LiveExample() {
   const cov = item.score.coverage / 100;
 
   return (
-    <div>
+    <div data-tour="live-example">
       <p className="text-ink-500">Changes here stay on this page.</p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <select className="input" value={roleId} onChange={(e) => setRoleId(e.target.value)} aria-label="Role">

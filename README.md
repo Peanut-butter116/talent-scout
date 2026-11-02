@@ -74,6 +74,14 @@ The app's **How it works** page (`/how-it-works`) has the formulas and a live wo
 4. See every change, with time, under History.
 5. Open the job description from the link under the role summary.
 
+### Sourcing
+1. Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.
+2. **Open in LinkedIn** runs the search in a new tab — you browse LinkedIn yourself. **Save** keeps the search.
+3. Paste a profile or CV you like (or **Try an example**), add the profile link if you have it, and choose **Match evidence**.
+4. An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.
+5. **Confirm & save** adds the person to Candidates, ranked like everyone else. **Delete** removes them.
+6. Saved searches show how many people each search found, shortlisted, met and progressed.
+
 ### Candidates
 1. The list is ranked live; rows that move are highlighted.
 2. Switch between Cautious (default) and Raw fit.
@@ -99,14 +107,6 @@ The app's **How it works** page (`/how-it-works`) has the formulas and a live wo
 1. Log feedback for each finished chat: outcome, what you saw, one line.
 2. Read the hypothesis check: which criteria are holding up, unclear or not supported.
 3. Accept or dismiss the suggested weight change.
-
-### Sourcing
-1. Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.
-2. **Open in LinkedIn** runs the search in a new tab — you browse LinkedIn yourself. **Save** keeps the search.
-3. Paste a profile or CV you like (or **Try an example**), add the profile link if you have it, and choose **Match evidence**.
-4. An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.
-5. **Confirm & save** adds the person to Candidates, ranked like everyone else. **Delete** removes them.
-6. Saved searches show how many people each search found, shortlisted, met and progressed.
 
 ### Reset demo
 1. **Reset demo** (bottom of the sidebar) restores the original data.

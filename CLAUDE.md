@@ -272,7 +272,7 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
   the header, the sidebar footer and the /review footer. Sections: what this is (built
   by Sijia He for the Founder's EA application; JD links), the problem, the idea (9-step
   loop), scoring in plain words (+ link to How it works), user manual per page (Roles &
-  Criteria, Candidates, Pipeline, CEO review, Learning, Sourcing, Reset), weekly rhythm,
+  Criteria, Sourcing, Candidates, Pipeline, CEO review, Learning, Reset), weekly rhythm,
   privacy and fairness, limits / what a real version needs, built with, contact.
 - README.md in the repo mirrors the same content. Keep both in sync (Phase 5 must
   replace the Sourcing placeholder in both with real steps).
@@ -309,14 +309,19 @@ Sidebar: Roles & Criteria, Sourcing, Candidates, Pipeline, Learning. KPI strip o
 # UX
 - Fully responsive; sidebar collapses on mobile; wide tables scroll inside their
   container.
-- First-visit welcome modal: 2 short lines + "Take the tour" / "Explore". Shown once
-  per browser (state.welcomeSeen); "Tour" link in the header restarts the tour.
-- Guided tour (components/Tour.tsx; max 6 steps, skippable, one sentence each, bottom
-  card on mobile): 1) change a weight on Founding AI Engineer → 2) see Candidates
-  re-rank → 3) Sourcing: try an example profile → 4) Generate shortlist and open the CEO
-  review → 5) log a coffee chat → 6) accept the suggested change → "That's the loop".
-  Each step navigates, outlines its data-tour target and ticks when done; never
-  auto-navigates on completion. Position kept in sessionStorage; Reset clears it.
+- First visit in a browser: the tour starts automatically (no separate welcome modal; its
+  2 lines are folded into step 1). A localStorage flag `talent-scout:tour-seen` is set as
+  soon as any tour starts, so it never auto-starts again in that browser (finished or
+  skipped). Never auto-starts on /about, on a CEO results/import link, or on /review.
+  Reset demo does NOT clear the flag. The "Tour" link in the header restarts it any time.
+- Guided tour (components/Tour.tsx; 7 steps, skippable, one sentence each, bottom card
+  on mobile): 1) change a weight on Founding AI Engineer → 2) see Candidates re-rank →
+  3) How ranking works: live example ("See exactly how scores are calculated — and try
+  the weights yourself.") → 4) Sourcing: try an example profile → 5) Generate shortlist
+  and open the CEO review → 6) log a coffee chat → 7) accept the suggested change →
+  "That's the loop". Each step navigates, outlines its data-tour target and ticks when
+  done; never auto-navigates on completion. Position kept in sessionStorage; Reset
+  clears the position (not the seen flag).
 - Accessibility: visible :focus-visible outline everywhere, skip-to-content link,
   keyboard-operable table rows, review stack and dialogs (Escape closes).
 - Reset Demo button in the sidebar (with confirm). About this project section.

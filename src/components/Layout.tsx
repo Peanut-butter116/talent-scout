@@ -6,7 +6,7 @@ import { DemoBadge } from './DemoBadge';
 import { BuiltForGlot } from './GlotLogo';
 import { Footer } from './Disclaimer';
 import { ImportDecisions } from './ImportDecisions';
-import { TourProvider, useTour, WelcomeModal } from './Tour';
+import { TourProvider, useTour } from './Tour';
 
 const NAV = [
   { to: '/roles', label: 'Roles & Criteria', icon: ListChecks },
@@ -20,7 +20,6 @@ export function Layout() {
   return (
     <TourProvider>
       <Shell />
-      <WelcomeModal />
     </TourProvider>
   );
 }
