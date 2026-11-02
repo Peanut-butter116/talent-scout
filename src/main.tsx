@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 import { AppStateProvider } from './state/AppState';
 import '@fontsource-variable/plus-jakarta-sans';
@@ -13,5 +14,6 @@ createRoot(document.getElementById('root')!).render(
         <App />
       </AppStateProvider>
     </BrowserRouter>
+    <Analytics />
   </StrictMode>,
 );
