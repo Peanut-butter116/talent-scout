@@ -145,6 +145,14 @@ export function AboutPage() {
           <li>See every change, with time, under History.</li>
           <li>Open the job description from the link under the role summary.</li>
         </Manual>
+        <Manual title="Sourcing" to="/sourcing">
+          <li>Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.</li>
+          <li>Open in LinkedIn runs the search in a new tab — you browse LinkedIn yourself. Save keeps the search.</li>
+          <li>Paste a profile or CV you like (or Try an example), add the profile link if you have it, and choose Match evidence.</li>
+          <li>An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.</li>
+          <li>Confirm & save adds the person to Candidates, ranked like everyone else. Delete removes them.</li>
+          <li>Saved searches show how many people each search found, shortlisted, met and progressed.</li>
+        </Manual>
         <Manual title="Candidates" to="/candidates">
           <li>The list is ranked live; rows that move are highlighted.</li>
           <li>Switch between Cautious (default) and Raw fit.</li>
@@ -170,14 +178,6 @@ export function AboutPage() {
           <li>Log feedback for each finished chat: outcome, what you saw, one line.</li>
           <li>Read the hypothesis check: which criteria are holding up, unclear or not supported.</li>
           <li>Accept or dismiss the suggested weight change.</li>
-        </Manual>
-        <Manual title="Sourcing" to="/sourcing">
-          <li>Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.</li>
-          <li>Open in LinkedIn runs the search in a new tab — you browse LinkedIn yourself. Save keeps the search.</li>
-          <li>Paste a profile or CV you like (or Try an example), add the profile link if you have it, and choose Match evidence.</li>
-          <li>An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.</li>
-          <li>Confirm & save adds the person to Candidates, ranked like everyone else. Delete removes them.</li>
-          <li>Saved searches show how many people each search found, shortlisted, met and progressed.</li>
         </Manual>
         <Manual title="Reset demo">
           <li>Reset demo (bottom of the sidebar) restores the original data.</li>

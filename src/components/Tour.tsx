@@ -1,6 +1,7 @@
 import { Check, X } from 'lucide-react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { isResultsHash } from '../lib/share';
 import { useAppState } from '../state/AppState';
 import type { AppState } from '../state/reducer';
 
@@ -48,6 +49,11 @@ export const TOUR_STEPS: Step[] = [
     text: 'The ranking updates — rows that moved are highlighted.',
   },
   {
+    route: '/how-it-works',
+    target: 'live-example',
+    text: 'See exactly how scores are calculated — and try the weights yourself.',
+  },
+  {
     route: '/sourcing',
     target: 'try-example',
     text: 'Try an example profile, check the suggestions, then save.',
@@ -82,6 +88,24 @@ const Ctx = createContext<TourCtx>({ start: () => {}, active: false });
 export const useTour = () => useContext(Ctx);
 
 const KEY = 'talent-scout:tour-step';
+/** localStorage flag: set as soon as a tour starts, so it never auto-starts again in this browser. */
+export const TOUR_SEEN_KEY = 'talent-scout:tour-seen';
+
+function tourSeen(): boolean {
+  try {
+    return localStorage.getItem(TOUR_SEEN_KEY) === '1';
+  } catch {
+    return true; // storage blocked: don't keep auto-starting
+  }
+}
+
+function markTourSeen() {
+  try {
+    localStorage.setItem(TOUR_SEEN_KEY, '1');
+  } catch {
+    // ignore
+  }
+}
 
 export function TourProvider({ children }: { children: ReactNode }) {
   const { state, dispatch } = useAppState();
@@ -116,9 +140,22 @@ export function TourProvider({ children }: { children: ReactNode }) {
   );
 
   const start = useCallback(() => {
+    markTourSeen();
     dispatch({ type: 'SET_WELCOME_SEEN' });
     go(0);
   }, [dispatch, go]);
+
+  // First visit in this browser: start the tour straight away — but never on About or on a
+  // CEO results/import link (/review has no tour at all).
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (autoStarted.current || step !== null || tourSeen()) return;
+    if (location.pathname.startsWith('/about') || isResultsHash(location.hash)) return;
+    autoStarted.current = true;
+    start();
+    // Only on first mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const current = step !== null && step < TOUR_STEPS.length ? TOUR_STEPS[step] : null;
   const done = current?.done ? current.done(state, base.current) : false;
@@ -169,6 +206,12 @@ export function TourProvider({ children }: { children: ReactNode }) {
                     <X className="h-4 w-4" />
                   </button>
                 </div>
+                {step === 0 && (
+                  <p className="mt-2 text-sm text-ink-300">
+                    Welcome to Talent Scout — a weekly shortlist that learns which hiring criteria really work. Candidates are
+                    fictional; your edits stay in this browser.
+                  </p>
+                )}
                 <p className="mt-2 text-[15px] leading-snug">
                   {done && <Check className="-mt-0.5 mr-1.5 inline h-4 w-4 text-teal-300" aria-label="Done" />}
                   {current.text}
@@ -208,30 +251,5 @@ export function TourProvider({ children }: { children: ReactNode }) {
         </div>
       )}
     </Ctx.Provider>
-  );
-}
-
-/** First-visit welcome: two short lines, shown once per browser. */
-export function WelcomeModal() {
-  const { state, dispatch } = useAppState();
-  const { start, active } = useTour();
-  if (state.welcomeSeen || active) return null;
-  const close = () => dispatch({ type: 'SET_WELCOME_SEEN' });
-  return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-950/30 p-3 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="welcome-h">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-7 shadow-2xl">
-        <h2 id="welcome-h" className="text-2xl font-semibold tracking-display text-ink-900">Talent Scout</h2>
-        <p className="mt-3 text-[15px] text-ink-600">A weekly shortlist that learns which hiring criteria really work.</p>
-        <p className="mt-1 text-[15px] text-ink-600">Candidates are fictional. Your edits stay in this browser.</p>
-        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-          <button className="btn-primary flex-1" onClick={start} autoFocus>
-            Take the tour
-          </button>
-          <button className="btn-secondary flex-1" onClick={close}>
-            Explore
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
