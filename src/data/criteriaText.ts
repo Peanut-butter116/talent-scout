@@ -9,8 +9,8 @@ export const CRITERION_TEXT: Record<string, { description: string; examples: str
     examples: ['trained a transformer model from scratch', 'designed the model architecture', 'built a custom neural network for speech', 'pre-trained an encoder on our own data'],
   },
   ai_rt: {
-    description: 'Real-time speech, translation or low-latency inference experience.',
-    examples: ['streaming speech recognition with low latency', 'real-time translation system', 'cut inference latency to under 200ms', 'on-device speech model', 'text-to-speech in production'],
+    description: 'Real-time ML experience: speech, streaming or low-latency inference.',
+    examples: ['streaming speech recognition with low latency', 'real-time speech system', 'cut inference latency to under 200ms', 'on-device speech model', 'text-to-speech in production'],
   },
   ai_pedigree: {
     description: 'Worked at a top research lab or an early-stage AI team.',
@@ -25,11 +25,11 @@ export const CRITERION_TEXT: Record<string, { description: string; examples: str
     examples: ['built and shipped a product used by thousands', 'launched an open-source project', 'took a prototype to production', 'side project with real users'],
   },
   ai_sharp: {
-    description: 'Energised by hard, ambiguous problems; gets to the point.',
+    description: 'Enjoys hard, open-ended problems; clear and concise.',
     examples: ['loves hard ambiguous problems', 'writes short clear technical posts', 'curious about how things work', 'asks sharp questions'],
   },
   ai_ego: {
-    description: 'Here to build, not to be seen building; changes mind on good reasoning.',
+    description: 'Shares credit, takes feedback, changes their mind on good reasoning.',
     examples: ['credits the team', 'changed my mind after a colleague’s benchmark', 'mentors others quietly', 'happy to do unglamorous work'],
   },
   // Full Stack Engineer
@@ -54,16 +54,16 @@ export const CRITERION_TEXT: Record<string, { description: string; examples: str
     examples: ['taught myself a new language to fix a bug', 'worked independently with little guidance', 'figured it out from the docs', 'owned the project solo'],
   },
   fs_sharp: {
-    description: 'Energised by hard problems; clear and to the point.',
+    description: 'Enjoys hard problems; clear and concise.',
     examples: ['curious about hard problems', 'writes clear bug reports', 'asks good questions', 'short clear README'],
   },
   fs_ego: {
-    description: 'Low ego: credits others and takes feedback well.',
+    description: 'Team-first: credits others and takes feedback well.',
     examples: ['takes feedback well', 'credits contributors', 'helps teammates', 'changed approach after review'],
   },
   // Head of Engineering
   he_builder: {
-    description: 'Has shipped impactful products, not only managed them.',
+    description: 'Has shipped products people use, not only managed them.',
     examples: ['shipped a product used by thousands of customers', 'built the platform from zero', 'led the launch of a new product', 'took a product from idea to revenue'],
   },
   he_scale: {
@@ -75,11 +75,11 @@ export const CRITERION_TEXT: Record<string, { description: string; examples: str
     examples: ['still write code every week', 'hands-on across backend, frontend and ML', 'built the first version myself', 'review and ship code'],
   },
   he_rt: {
-    description: 'Real-time audio or developer-facing API platform experience.',
+    description: 'Has built real-time systems or developer API platforms.',
     examples: ['built a real-time audio platform', 'WebRTC voice infrastructure', 'public developer API with SDKs', 'low-latency media streaming'],
   },
   he_first: {
-    description: 'Thinks from first principles and makes the complex simple.',
+    description: 'Removes complexity: simpler systems, fewer moving parts.',
     examples: ['simplified the architecture', 'removed unnecessary services', 'first-principles design review', 'cut complexity and cost'],
   },
   he_sharp: {
@@ -146,7 +146,7 @@ export const CRITERION_TEXT: Record<string, { description: string; examples: str
 export const ROLE_SEARCH: Record<string, { titles: string[]; keywords: string[]; synonyms: string[] }> = {
   'ai-eng': {
     titles: ['ML Engineer', 'Machine Learning Engineer', 'Research Engineer', 'AI Engineer', 'Speech Scientist'],
-    keywords: ['speech', 'ASR', 'translation', 'real-time', 'inference'],
+    keywords: ['speech', 'ASR', 'LLM', 'real-time', 'inference'],
     synonyms: ['speech recognition', 'text-to-speech', 'low latency', 'streaming', 'on-device'],
   },
   fullstack: {
@@ -167,7 +167,7 @@ export const ROLE_SEARCH: Record<string, { titles: string[]; keywords: string[];
   talent: {
     titles: ['Talent Partner', 'Technical Recruiter', 'Talent Acquisition', 'Head of Talent'],
     keywords: ['technical recruiting', 'sourcing', 'engineering hiring'],
-    synonyms: ['recruiter', 'talent', 'Ashby', 'startup hiring'],
+    synonyms: ['recruiter', 'talent', 'ATS', 'startup hiring'],
   },
 };
 

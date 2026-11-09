@@ -18,8 +18,8 @@ export interface Criterion {
   name: string;
   weight: number;
   theme?: CriterionTheme;
-  /** Glot-wide qualities appear in every role. */
-  glotWide?: boolean;
+  /** Company-wide qualities appear in every role. */
+  companyWide?: boolean;
   /** One-line description (used by evidence matching and as a hint). */
   description?: string;
   /** 3–5 example phrases that would count as evidence. */
@@ -38,8 +38,8 @@ export interface Role {
   summary: string;
   criteria: Criterion[];
   mustHaves: MustHave[];
-  /** Glot's public job ad for this role (opens in a new tab). */
-  jdUrl?: string;
+  /** Created with "New role" (saved in this browser; cleared by Reset). */
+  custom?: boolean;
 }
 
 export type EvidenceStrength = 'strong' | 'weak';

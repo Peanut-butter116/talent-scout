@@ -98,3 +98,35 @@ describe('weights in state', () => {
     expect(s.chats.length).toBe(SEED_CHATS.length);
   });
 });
+
+describe('custom roles', () => {
+  it('New role starts with the three company-wide qualities, totals 100, and is selected', () => {
+    const s = reducer(createSeedState(), { type: 'ADD_ROLE', title: 'Product Designer', id: 'role-x' });
+    const role = s.roles.find((r) => r.id === 'role-x')!;
+    expect(role.custom).toBe(true);
+    expect(role.criteria.map((c) => c.name)).toEqual(['Builder', 'Curious problem-solver', 'Team-first']);
+    expect(role.criteria.every((c) => c.companyWide && c.theme)).toBe(true);
+    expect(totalWeight(role.criteria)).toBe(100);
+    expect(s.selectedRoleId).toBe('role-x');
+    expect(s.weightHistory[0].description).toMatch(/Product Designer/);
+  });
+
+  it('criteria can be added to a new role, and Reset clears it', () => {
+    let s = reducer(createSeedState(), { type: 'ADD_ROLE', title: 'Designer', id: 'role-y' });
+    s = reducer(s, { type: 'ADD_CRITERION', roleId: 'role-y', name: 'Portfolio quality' });
+    expect(s.roles.find((r) => r.id === 'role-y')!.criteria).toHaveLength(4);
+    expect(totalWeight(s.roles.find((r) => r.id === 'role-y')!.criteria)).toBe(100);
+    const reset = reducer(s, { type: 'RESET' });
+    expect(reset.roles.some((r) => r.id === 'role-y')).toBe(false);
+    expect(reset.roles).toEqual(createSeedState().roles);
+  });
+
+  it('only custom roles can be deleted; blank names are ignored', () => {
+    let s = reducer(createSeedState(), { type: 'ADD_ROLE', title: 'Designer', id: 'role-z' });
+    s = reducer(s, { type: 'DELETE_ROLE', roleId: 'role-z' });
+    expect(s.roles.some((r) => r.id === 'role-z')).toBe(false);
+    expect(s.selectedRoleId).toBe('ai-eng');
+    expect(reducer(s, { type: 'DELETE_ROLE', roleId: 'ai-eng' })).toBe(s);
+    expect(reducer(s, { type: 'ADD_ROLE', title: '   ' })).toBe(s);
+  });
+});

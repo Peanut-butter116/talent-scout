@@ -24,10 +24,10 @@ export function HypothesisChip({ label }: { label: HypothesisLabel }) {
   );
 }
 
-export function GlotWideBadge() {
+export function CompanyWideBadge() {
   return (
-    <span className="chip bg-ink-100 text-ink-500" title="Appears in every Glot role">
-      Glot-wide quality
+    <span className="chip bg-ink-100 text-ink-500" title="Appears in every role at the company">
+      Company-wide quality
     </span>
   );
 }

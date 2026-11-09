@@ -1,9 +1,8 @@
 import { Check, Copy, Link2Off, PartyPopper } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { DemoBadge } from '../components/DemoBadge';
 import { CreditLine } from '../components/Disclaimer';
-import { BuiltForGlot } from '../components/GlotLogo';
+import { Brand } from '../components/Layout';
 import { DecisionSummary } from '../components/QuickReview';
 import { ReviewStack } from '../components/ReviewStack';
 import { rankCandidates, type RankedCandidate } from '../lib/scoring';
@@ -43,12 +42,8 @@ export function ReviewPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-ink-50">
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <span className="text-sm font-semibold text-ink-900">Talent Scout</span>
-          <BuiltForGlot />
-        </div>
-        <DemoBadge />
+      <div className="flex items-center px-4 py-3">
+        <Brand />
       </div>
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-4">
         {parsed.ok ? (

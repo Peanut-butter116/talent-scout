@@ -15,7 +15,7 @@ export function HowCalculated({ align = 'left' }: { align?: 'left' | 'right' }) 
       <span className="block font-mono text-xs">coverage × quality × verification</span>
       <span className="block">How much is evidenced, how strongly, and whether a person or a chat confirmed it.</span>
       <span className="mt-3 block">
-        <HowItWorksLink label="How it works" className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900" />
+        <HowItWorksLink label="How it works" className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-700 underline decoration-accent-200 underline-offset-4 hover:decoration-accent-700" />
       </span>
     </InfoTip>
   );

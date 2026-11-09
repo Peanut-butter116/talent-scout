@@ -1,6 +1,7 @@
 import { SEED_CANDIDATES } from '../data/candidates';
 import { SEED_CHATS } from '../data/chats';
-import { SEED_ROLES } from '../data/roles';
+import { COMPANY_WIDE_QUALITIES, SEED_ROLES } from '../data/roles';
+import { CRITERION_TEXT } from '../data/criteriaText';
 import type { RubricSuggestion } from '../lib/analysis';
 import { pickShortlist } from '../lib/pipeline';
 import { applyChatChecks } from '../lib/scoring';
@@ -20,8 +21,8 @@ import type {
 } from '../types';
 
 /** Bump both whenever the saved-state shape changes, so old saved state resets cleanly. */
-export const STATE_VERSION = 6;
-export const STORAGE_KEY = 'talent-scout:v6';
+export const STATE_VERSION = 7;
+export const STORAGE_KEY = 'talent-scout:v7';
 
 export interface AppState {
   version: number;
@@ -81,6 +82,8 @@ export type Action =
   | { type: 'ADD_CANDIDATE'; candidate: Candidate }
   | { type: 'DELETE_CANDIDATE'; candidateId: string }
   | { type: 'SAVE_SEARCH'; search: SavedSearch }
+  | { type: 'ADD_ROLE'; title: string; id?: string; at?: string }
+  | { type: 'DELETE_ROLE'; roleId: string }
   | { type: 'DELETE_SEARCH'; searchId: string }
   | { type: 'HYDRATE'; state: AppState }
   | { type: 'SET_REPLIED'; candidateId: string; replied: boolean }
@@ -340,6 +343,53 @@ export function reducer(state: AppState, action: Action): AppState {
         candidates: state.candidates.filter((c) => c.id !== action.candidateId),
         chats: state.chats.filter((c) => c.candidateId !== action.candidateId),
         reviewLog: state.reviewLog.filter((e) => e.candidateId !== action.candidateId),
+      };
+    }
+
+    case 'ADD_ROLE': {
+      const title = action.title.trim();
+      if (!title) return state;
+      const id = action.id ?? uid('role');
+      // Example phrases for evidence matching come from the seeded company-wide criteria.
+      const examplesFrom = { builder: 'ai_builder', sharp: 'ai_sharp', lowEgo: 'ai_ego' } as const;
+      const role: Role = {
+        id,
+        title,
+        summary: 'Your own role — saved in this browser.',
+        custom: true,
+        mustHaves: [],
+        criteria: COMPANY_WIDE_QUALITIES.map((q) => ({
+          id: `${id}_${q.theme}`,
+          name: q.name,
+          weight: q.weight,
+          theme: q.theme,
+          companyWide: true,
+          description: q.description,
+          examples: CRITERION_TEXT[examplesFrom[q.theme]]?.examples,
+        })),
+      };
+      const next = { ...state, roles: [...state.roles, role], selectedRoleId: id };
+      return logChange(next, {
+        at: action.at ?? new Date().toISOString(),
+        roleId: id,
+        source: 'manual',
+        description: `Created role “${title}” with the three company-wide qualities`,
+      });
+    }
+
+    case 'DELETE_ROLE': {
+      const role = state.roles.find((r) => r.id === action.roleId);
+      if (!role?.custom) return state;
+      const gone = new Set(state.candidates.filter((c) => c.roleId === role.id).map((c) => c.id));
+      return {
+        ...state,
+        roles: state.roles.filter((r) => r.id !== role.id),
+        candidates: state.candidates.filter((c) => !gone.has(c.id)),
+        chats: state.chats.filter((c) => !gone.has(c.candidateId)),
+        reviewLog: state.reviewLog.filter((e) => !gone.has(e.candidateId)),
+        savedSearches: state.savedSearches.filter((s) => s.roleId !== role.id),
+        weightHistory: state.weightHistory.filter((h) => h.roleId !== role.id),
+        selectedRoleId: state.selectedRoleId === role.id ? state.roles[0].id : state.selectedRoleId,
       };
     }
 

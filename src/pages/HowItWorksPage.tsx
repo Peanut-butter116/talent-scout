@@ -149,7 +149,7 @@ export function HowItWorksPage() {
         <ul className="space-y-2">
           {SOURCES.map((s) => (
             <li key={s.href}>
-              <a href={s.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900">
+              <a href={s.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-accent-700 underline decoration-accent-200 underline-offset-4 hover:decoration-accent-700">
                 {s.label} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
               </a>
             </li>

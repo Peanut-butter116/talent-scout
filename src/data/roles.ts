@@ -1,144 +1,116 @@
 import type { Role } from '../types';
 import { CRITERION_TEXT } from './criteriaText';
 
+/** The fictional company the demo is set in. */
+export const COMPANY = { name: 'Northwind Labs', blurb: 'a 10-person AI startup' };
+
 /**
- * Roles are paraphrased from Glot's public job ads.
- * Weights in each role sum to 100.
+ * Five generic roles at Northwind Labs. Weights in each role sum to 100.
+ * Criterion ids, weights and themes are stable: the seeded learning story depends on them.
  */
 const ROLES: Role[] = [
   {
     id: 'ai-eng',
-    jdUrl: 'https://jobs.ashbyhq.com/glot/f529d4cb-dec4-4db8-987b-acc64bec9782',
     title: 'Founding AI Engineer',
-    summary:
-      'Owns AI direction and model architecture, and sits on the senior leadership committee.',
+    summary: 'Sets the technical direction for AI and builds the first models end to end.',
     criteria: [
-      { id: 'ai_model', name: 'Deep hands-on model building (beyond fine-tuning)', weight: 25 },
-      { id: 'ai_rt', name: 'Real-time / speech / translation / low-latency inference', weight: 25 },
-      {
-        id: 'ai_pedigree',
-        name: 'High-bar background (top research lab or early-stage AI team)',
-        weight: 10,
-        theme: 'pedigree',
-      },
-      { id: 'ai_judgement', name: 'Judgement on hard-to-reverse decisions', weight: 10 },
-      { id: 'ai_builder', name: 'Builder', weight: 10, theme: 'builder', glotWide: true },
-      { id: 'ai_sharp', name: 'Sharp & curious', weight: 10, theme: 'sharp', glotWide: true },
-      { id: 'ai_ego', name: 'Low ego', weight: 10, theme: 'lowEgo', glotWide: true },
+      { id: 'ai_model', name: 'Model building from scratch', weight: 25 },
+      { id: 'ai_rt', name: 'Real-time / low-latency ML (speech, streaming)', weight: 25 },
+      { id: 'ai_pedigree', name: 'Pedigree (top lab or early AI team)', weight: 10, theme: 'pedigree' },
+      { id: 'ai_judgement', name: 'Judgement on hard-to-undo calls', weight: 10 },
+      { id: 'ai_builder', name: 'Builder', weight: 10, theme: 'builder', companyWide: true },
+      { id: 'ai_sharp', name: 'Curious problem-solver', weight: 10, theme: 'sharp', companyWide: true },
+      { id: 'ai_ego', name: 'Team-first', weight: 10, theme: 'lowEgo', companyWide: true },
     ],
     mustHaves: [],
   },
   {
     id: 'fullstack',
-    jdUrl: 'https://jobs.ashbyhq.com/glot/e1dfbeef-d771-4cc2-9d32-404a9c7311d6',
     title: 'Full Stack Engineer',
-    summary: 'Versatile across AI, backend and frontend, with a lean towards backend.',
+    summary: 'Ships features across the stack, leaning towards backend and AI.',
     criteria: [
       { id: 'fs_backend', name: 'Backend depth', weight: 25 },
       {
         id: 'fs_builder',
-        name: 'Builder (side projects, hackathons, things built outside class/work)',
+        name: 'Builder (side projects, hackathons, open source)',
         weight: 25,
         theme: 'builder',
-        glotWide: true,
+        companyWide: true,
       },
-      { id: 'fs_versatile', name: 'Full-stack versatility incl. AI', weight: 15 },
-      {
-        id: 'fs_pedigree',
-        name: 'Top-of-field signal (honours or equivalent)',
-        weight: 10,
-        theme: 'pedigree',
-      },
-      { id: 'fs_independent', name: 'Figures things out independently', weight: 10 },
-      { id: 'fs_sharp', name: 'Sharp & curious', weight: 10, theme: 'sharp', glotWide: true },
-      { id: 'fs_ego', name: 'Low ego', weight: 5, theme: 'lowEgo', glotWide: true },
+      { id: 'fs_versatile', name: 'Works across frontend, backend and AI', weight: 15 },
+      { id: 'fs_pedigree', name: 'Academic distinction (honours or similar)', weight: 10, theme: 'pedigree' },
+      { id: 'fs_independent', name: 'Self-directed', weight: 10 },
+      { id: 'fs_sharp', name: 'Curious problem-solver', weight: 10, theme: 'sharp', companyWide: true },
+      { id: 'fs_ego', name: 'Team-first', weight: 5, theme: 'lowEgo', companyWide: true },
     ],
     mustHaves: [],
   },
   {
     id: 'head-eng',
-    jdUrl: 'https://jobs.ashbyhq.com/glot/1efd6395-c9d0-44e3-8195-4390745161f2',
     title: 'Head of Engineering',
-    summary:
-      'Ships impactful products: hands-on early, then scales the architecture to a team. First-principles; makes the complex simple.',
+    summary: 'Builds the first products hands-on, then grows the team and the architecture.',
     criteria: [
       {
         id: 'he_builder',
-        name: 'Builder (shipped impactful products)',
+        name: 'Builder (shipped products people use)',
         weight: 25,
         theme: 'builder',
-        glotWide: true,
+        companyWide: true,
       },
-      { id: 'he_scale', name: 'Scaling architecture and teams', weight: 20 },
-      { id: 'he_hands', name: 'Hands-on across full stack + AI', weight: 15 },
-      {
-        id: 'he_rt',
-        name: 'Real-time audio or developer-facing API platforms (strong plus)',
-        weight: 15,
-      },
-      { id: 'he_first', name: 'First-principles, simplifies complexity', weight: 15 },
-      { id: 'he_sharp', name: 'Sharp & curious', weight: 5, theme: 'sharp', glotWide: true },
-      { id: 'he_ego', name: 'Low ego', weight: 5, theme: 'lowEgo', glotWide: true },
+      { id: 'he_scale', name: 'Has scaled systems and teams', weight: 20 },
+      { id: 'he_hands', name: 'Still hands-on (full stack + AI)', weight: 15 },
+      { id: 'he_rt', name: 'Real-time or developer API platforms', weight: 15 },
+      { id: 'he_first', name: 'Simplifies complex systems', weight: 15 },
+      { id: 'he_sharp', name: 'Curious problem-solver', weight: 5, theme: 'sharp', companyWide: true },
+      { id: 'he_ego', name: 'Team-first', weight: 5, theme: 'lowEgo', companyWide: true },
     ],
     mustHaves: [],
   },
   {
     id: 'bizops',
-    jdUrl: 'https://jobs.ashbyhq.com/glot/c1278e4e-078f-47c0-920d-2ce93234350c',
     title: 'Business Operations',
-    summary:
-      'Generalist working with the Chief of Staff on systems, suppliers, onboarding, registers and decision support.',
+    summary: 'Runs the company’s operating systems: suppliers, onboarding, tools and decision support.',
     criteria: [
       {
         id: 'bo_builder',
-        name: 'Builder (turns repeated tasks into systems)',
+        name: 'Builder (automates repeated work)',
         weight: 25,
         theme: 'builder',
-        glotWide: true,
+        companyWide: true,
       },
-      {
-        id: 'bo_process',
-        name: 'End-to-end process ownership (4–6 yrs consulting/startup ops)',
-        weight: 20,
-      },
-      { id: 'bo_precision', name: 'Precision and attention to detail', weight: 15 },
-      {
-        id: 'bo_decision',
-        name: 'Clear decision support (one-page briefs, recommendations)',
-        weight: 15,
-      },
-      { id: 'bo_sharp', name: 'Sharp & curious', weight: 15, theme: 'sharp', glotWide: true },
-      { id: 'bo_ego', name: 'Low ego', weight: 10, theme: 'lowEgo', glotWide: true },
+      { id: 'bo_process', name: 'Owns operations end to end (4–6 yrs)', weight: 20 },
+      { id: 'bo_precision', name: 'Precise and detail-oriented', weight: 15 },
+      { id: 'bo_decision', name: 'Clear written recommendations', weight: 15 },
+      { id: 'bo_sharp', name: 'Curious problem-solver', weight: 15, theme: 'sharp', companyWide: true },
+      { id: 'bo_ego', name: 'Team-first', weight: 10, theme: 'lowEgo', companyWide: true },
     ],
-    mustHaves: [{ id: 'rtw', label: 'Right to work in UK', enabled: true }],
+    mustHaves: [{ id: 'rtw', label: 'Right to work in the UK', enabled: true }],
   },
   {
     id: 'talent',
-    jdUrl: 'https://jobs.ashbyhq.com/glot/ebd0691d-9abd-46b2-9ae5-5eaa3cc807f8',
     title: 'Talent Partner',
-    summary:
-      'Owns hiring end to end: sourcing, screening and running the pipeline in Ashby.',
+    summary: 'Owns hiring end to end, from direct sourcing to a structured interview process.',
     criteria: [
-      { id: 'tp_reader', name: 'Reader of people (polished profile vs real builder)', weight: 25 },
+      { id: 'tp_reader', name: 'Spots real builders behind polished CVs', weight: 25 },
       {
         id: 'tp_builder',
-        name: 'Builder (set up/improved a hiring process)',
+        name: 'Builder (has set up a hiring process)',
         weight: 20,
         theme: 'builder',
-        glotWide: true,
+        companyWide: true,
       },
-      { id: 'tp_sourcing', name: 'Direct sourcing via LinkedIn and networks', weight: 15 },
-      { id: 'tp_tenure', name: '5–8 yrs recruiting incl. technical roles', weight: 15 },
+      { id: 'tp_sourcing', name: 'Direct sourcing (LinkedIn, referrals)', weight: 15 },
+      { id: 'tp_tenure', name: '5–8 yrs recruiting, incl. technical roles', weight: 15 },
       {
         id: 'tp_sharp',
-        name: 'Sharp & curious (writes plainly, direct)',
+        name: 'Curious problem-solver (writes plainly)',
         weight: 15,
         theme: 'sharp',
-        glotWide: true,
+        companyWide: true,
       },
-      { id: 'tp_ego', name: 'Low ego', weight: 10, theme: 'lowEgo', glotWide: true },
+      { id: 'tp_ego', name: 'Team-first', weight: 10, theme: 'lowEgo', companyWide: true },
     ],
-    mustHaves: [{ id: 'rtw', label: 'Right to work in UK', enabled: true }],
+    mustHaves: [{ id: 'rtw', label: 'Right to work in the UK', enabled: true }],
   },
 ];
 
@@ -148,18 +120,9 @@ export const SEED_ROLES: Role[] = ROLES.map((r) => ({
   criteria: r.criteria.map((c) => ({ ...c, ...CRITERION_TEXT[c.id] })),
 }));
 
-export const GLOT_WIDE_QUALITIES = [
-  {
-    name: 'Sharp & curious',
-    description: 'Energised by hard, ambiguous problems; gets to the point.',
-  },
-  {
-    name: 'Builder',
-    description:
-      'Has built or shipped something real (project, system, product), not only maintained one.',
-  },
-  {
-    name: 'Low ego',
-    description: 'Here to build, not to be seen building; changes mind when reasoning is sound.',
-  },
+/** Qualities every role shares. A new role starts with these three. */
+export const COMPANY_WIDE_QUALITIES = [
+  { theme: 'builder' as const, name: 'Builder', weight: 40, description: 'Has built or shipped something real, not only maintained it.' },
+  { theme: 'sharp' as const, name: 'Curious problem-solver', weight: 30, description: 'Enjoys hard, open-ended problems; clear and concise.' },
+  { theme: 'lowEgo' as const, name: 'Team-first', weight: 30, description: 'Shares credit, takes feedback, changes their mind on good reasoning.' },
 ];

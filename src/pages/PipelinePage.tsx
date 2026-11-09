@@ -328,7 +328,7 @@ function BoardCard({
       </div>
 
       {c.status === 'done' && (
-        <p className="mt-2 text-xs text-ink-500">Next step: hand to formal pipeline (Ashby — not connected in demo)</p>
+        <p className="mt-2 text-xs text-ink-500">Next step: hand to your applicant tracking system (ATS) — not connected in demo</p>
       )}
 
       {skipping ? (
@@ -470,9 +470,9 @@ function SourceTable({ rows }: { rows: ReturnType<typeof resultsBySource> }) {
 
 function WeeklyRhythm() {
   const steps = [
-    { day: 'Mon', who: 'EA', text: 'Sources & scores' },
+    { day: 'Mon', who: 'Team', text: 'Sources & scores' },
     { day: 'Tue', who: 'CEO', text: 'Approves shortlist (~10 min)' },
-    { day: 'Wed–Thu', who: 'EA', text: 'Outreach & booking' },
+    { day: 'Wed–Thu', who: 'Team', text: 'Outreach & booking' },
     { day: 'Fri', who: 'CEO', text: 'Logs chat feedback (~30 sec each) — rubric updates' },
   ];
   return (

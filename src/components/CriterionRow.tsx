@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { CriterionAnalysis } from '../lib/analysis';
 import { useAppState } from '../state/AppState';
 import type { Criterion, Role } from '../types';
-import { GlotWideBadge, HypothesisChip } from './Chips';
+import { CompanyWideBadge, HypothesisChip } from './Chips';
 
 export function WeightSlider({
   role,
@@ -107,7 +107,7 @@ export function CriterionRow({
             </div>
           )}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {criterion.glotWide && <GlotWideBadge />}
+            {criterion.companyWide && <CompanyWideBadge />}
             {analysis && <HypothesisChip label={analysis.label} />}
           </div>
         </div>

@@ -61,6 +61,7 @@ describe('draftOutreach', () => {
     const sam = SEED_CANDIDATES.find((c) => c.id === 'c-sam')!;
     const text = draftOutreach(sam, SEED_ROLES[0]);
     expect(text).toContain('Hi Sam');
+    expect(text).toContain('Northwind Labs, a 10-person AI startup');
     expect(text).toMatch(/streaming ASR|noise suppression/);
   });
 });

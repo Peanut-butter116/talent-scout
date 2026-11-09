@@ -1,7 +1,6 @@
 import { ExternalLink, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AddProfile } from '../components/AddProfile';
-import { JdLink } from '../components/JdLink';
 import { PageHeader } from '../components/PageHeader';
 import { RoleSelector } from '../components/RoleSelector';
 import { SearchBuilder } from '../components/SearchBuilder';
@@ -16,7 +15,7 @@ export function SourcingPage() {
 
   return (
     <>
-      <PageHeader title="Sourcing" subtitle="Find people on LinkedIn, then add the ones you like." actions={<JdLink role={role} />} />
+      <PageHeader title="Sourcing" subtitle="Find people on LinkedIn, then add the ones you like." />
       <RoleSelector />
       <div className="space-y-14">
         <SearchBuilder role={role} />
