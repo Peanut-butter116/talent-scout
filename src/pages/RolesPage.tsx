@@ -1,8 +1,7 @@
-import { Plus } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CriterionRow } from '../components/CriterionRow';
 import { InfoTip } from '../components/InfoTip';
-import { JdLink } from '../components/JdLink';
 import { PageHeader } from '../components/PageHeader';
 import { RoleSelector } from '../components/RoleSelector';
 import { WeightHistory } from '../components/WeightHistory';
@@ -16,6 +15,9 @@ export function RolesPage() {
   const role = useSelectedRole();
   const analysis = useRoleAnalysis(role);
   const [newName, setNewName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [roleName, setRoleName] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const total = totalWeight(role.criteria);
   const ranked = useRanked(role);
 
@@ -34,17 +36,74 @@ export function RolesPage() {
 
   return (
     <>
-      <PageHeader title="Roles & Criteria" subtitle="Each criterion is a bet on what predicts a great hire." />
+      <PageHeader
+        title="Roles & Criteria"
+        subtitle="Each criterion is a bet on what predicts a great hire."
+        actions={
+          !creating && (
+            <button className="btn-secondary" onClick={() => setCreating(true)} data-tour="new-role">
+              <Plus className="h-4 w-4" /> New role
+            </button>
+          )
+        }
+      />
+      {creating && (
+        <form
+          className="mb-8 flex flex-wrap items-center gap-2 rounded-2xl bg-ink-50 p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!roleName.trim()) return;
+            dispatch({ type: 'ADD_ROLE', title: roleName });
+            setRoleName('');
+            setCreating(false);
+          }}
+        >
+          <input
+            className="input min-w-0 flex-1"
+            placeholder="Role name, e.g. Product Designer"
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
+            aria-label="New role name"
+            autoFocus
+          />
+          <button className="btn-primary" type="submit" disabled={!roleName.trim()}>
+            Create
+          </button>
+          <button className="btn-ghost p-2" type="button" onClick={() => setCreating(false)} aria-label="Cancel new role">
+            <X className="h-4 w-4" />
+          </button>
+          <p className="w-full text-xs text-ink-400">Starts with the three company-wide qualities. Add your own criteria next.</p>
+        </form>
+      )}
       <RoleSelector />
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
         <div className="min-w-0 space-y-12 lg:col-span-2">
           <section>
             <p className="text-lg text-ink-700">{role.summary}</p>
-            <div className="mt-2 flex items-center gap-2">
-              <JdLink role={role} />
-              <InfoTip label="About this summary">Paraphrased from Glot's public job ad.</InfoTip>
-            </div>
+            {role.custom && (
+              <div className="mt-2">
+                {confirmDelete ? (
+                  <span className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="text-ink-600">Delete this role?</span>
+                    <button
+                      className="btn bg-rose-600 px-3 py-1 text-xs text-white hover:bg-rose-700"
+                      onClick={() => {
+                        dispatch({ type: 'DELETE_ROLE', roleId: role.id });
+                        setConfirmDelete(false);
+                      }}
+                    >
+                      Delete
+                    </button>
+                    <button className="btn-ghost px-2 py-1 text-xs" onClick={() => setConfirmDelete(false)}>Cancel</button>
+                  </span>
+                ) : (
+                  <button className="btn-ghost -ml-3 text-sm text-ink-500 hover:text-rose-600" onClick={() => setConfirmDelete(true)}>
+                    <Trash2 className="h-4 w-4" /> Delete role
+                  </button>
+                )}
+              </div>
+            )}
           </section>
 
           <section aria-labelledby="criteria-h">
@@ -132,7 +191,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
       aria-label={`${label} ${checked ? 'on' : 'off'}`}
       onClick={onChange}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        checked ? 'bg-ink-900' : 'bg-ink-200'
+        checked ? 'bg-accent-700' : 'bg-ink-200'
       }`}
     >
       <span

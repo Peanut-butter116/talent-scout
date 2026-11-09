@@ -1,22 +1,35 @@
 /** @type {import('tailwindcss').Config} */
-// Design tokens matched to glot.com (see CLAUDE.md → STYLE): white page, #111 ink, warm greys,
-// black pill buttons, Plus Jakarta Sans. `navy`/`slate` map to the warm `ink` scale;
-// `teal` is a muted status green and `rose` is Glot's red — both used for status only.
+// Talent Scout's own design tokens (see CLAUDE.md → STYLE): calm white layout, neutral
+// greys (`ink`; `navy`/`slate` map to it), ONE deep-indigo accent, Inter font.
+// `teal` and `rose` are status colours only (good / not supported).
 const ink = {
-  50: '#f7f7f5',
-  100: '#f2f2f0',
-  200: '#e6e6e3',
-  300: '#cfcfcb',
-  400: '#6e6e6a',
-  500: '#5e5e5a',
-  600: '#52524f',
-  700: '#3a3a37',
-  800: '#1a1a19',
-  900: '#111111',
-  950: '#0a0a0a',
+  50: '#fafafa',
+  100: '#f4f4f5',
+  200: '#e4e4e7',
+  300: '#d4d4d8',
+  400: '#71717a',
+  500: '#52525b',
+  600: '#3f3f46',
+  700: '#27272a',
+  800: '#1f1f23',
+  900: '#18181b',
+  950: '#09090b',
 };
 
-// Status colours only (never decoration): muted green = good, Glot red = flag / not supported.
+// The one accent: deep indigo for primary buttons, links, toggles and focus rings.
+const accent = {
+  50: '#eef2ff',
+  100: '#e0e7ff',
+  200: '#c7d2fe',
+  300: '#a5b4fc',
+  500: '#6366f1',
+  600: '#4f46e5',
+  700: '#4338ca',
+  800: '#3730a3',
+  900: '#312e81',
+};
+
+// Status colours only (never decoration): muted green = good, red = flag / not supported.
 const good = {
   50: '#eef5f0',
   100: '#dcebe1',
@@ -27,7 +40,7 @@ const good = {
   800: '#245a3d',
   900: '#1c4630',
 };
-const glotRed = {
+const red = {
   50: '#fbeeee',
   100: '#f6dcdb',
   500: '#cb4644',
@@ -43,12 +56,13 @@ export default {
         navy: ink,
         slate: ink,
         ink,
+        accent,
         teal: good,
-        rose: glotRed,
+        rose: red,
       },
       fontFamily: {
         sans: [
-          '"Plus Jakarta Sans Variable"',
+          '"Inter Variable"',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',

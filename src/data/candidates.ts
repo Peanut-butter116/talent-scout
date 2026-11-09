@@ -17,7 +17,7 @@ export const SEED_CANDIDATES: Candidate[] = [
     id: 'c-theo',
     name: 'Theo Marlowe',
     headline: 'Research Scientist, speech models',
-    employer: 'Northwind Research',
+    employer: 'Marchmont Research',
     roleId: 'ai-eng',
     source: 'Agency',
     status: 'done',

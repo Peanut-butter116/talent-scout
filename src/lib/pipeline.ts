@@ -1,3 +1,4 @@
+import { COMPANY } from '../data/roles';
 import {
   OUTCOME_VALUE,
   SOURCE_CHANNELS,
@@ -133,7 +134,7 @@ export function draftOutreach(candidate: Candidate, role: Role): string {
     ``,
     `${hookLine}`,
     ``,
-    `I'm hiring a ${role.title} at Glot. We're building real-time translation for real-world conversations, and we care most about people who build things. Would you be open to a 20-minute coffee chat next week? No prep needed — just a conversation.`,
+    `I'm hiring a ${role.title} at ${COMPANY.name}, ${COMPANY.blurb}. We care most about people who build things. Would you be open to a 20-minute coffee chat next week? No prep needed — just a conversation.`,
     ``,
     `Best,`,
     `[Your name]`,

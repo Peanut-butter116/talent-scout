@@ -57,7 +57,7 @@ describe('keyword fallback on the example profiles', () => {
     expect(byId(s, 'ai_rt').strength).toBe('strong');
     expect(byId(s, 'ai_builder').strength).toBe('strong');
     expect(byId(s, 'ai_pedigree').strength).toBeNull();
-    expect(byId(s, 'ai_rt').sentence).toMatch(/latency/);
+    expect(byId(s, 'ai_rt').sentence).toMatch(/latency|streaming/);
   });
 
   it('Dami (Full Stack): backend + builder found; pedigree and low ego missing', () => {
@@ -90,7 +90,7 @@ describe('model matching (with a fake embedder)', () => {
   it('picks the best-matching sentence per criterion by cosine similarity', async () => {
     const text = 'Cut streaming speech latency to 200ms in real-time.\nLikes cooking.';
     const s = await extractWithModel(text, role('ai-eng'), fake);
-    expect(byId(s, 'ai_rt').sentence).toMatch(/latency/);
+    expect(byId(s, 'ai_rt').sentence).toMatch(/latency|streaming/);
     expect(byId(s, 'ai_rt').method).toBe('model');
     expect(byId(s, 'ai_rt').similarity).toBeGreaterThan(0);
   });

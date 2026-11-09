@@ -1,107 +1,79 @@
 # Talent Scout
 
-**Candidate outreach demo for Glot · Built by Sijia He · Not an official Glot product**
-
-A weekly shortlist that learns what really predicts a great hire.
+**A hiring pipeline that learns which criteria really work.**
+A portfolio project by Sijia He · [Contact](mailto:sijia.he116@outlook.com?subject=Talent%20Scout)
 
 ## Contents
 
-1. [What this is](#1-what-this-is)
-2. [The problem](#2-the-problem)
-3. [The idea](#3-the-idea)
-4. [How the scoring works](#4-how-the-scoring-works)
-5. [User manual](#5-user-manual)
-6. [A suggested weekly rhythm](#6-a-suggested-weekly-rhythm)
-7. [Privacy and fairness](#7-privacy-and-fairness)
-8. [Limits, and what a real version needs](#8-limits-and-what-a-real-version-needs)
-9. [Built with](#9-built-with)
-10. [Contact](#10-contact)
+1. [What it is](#1-what-it-is)
+2. [The idea](#2-the-idea)
+3. [How scoring works](#3-how-scoring-works)
+4. [User manual](#4-user-manual)
+5. [Privacy and fairness](#5-privacy-and-fairness)
+6. [How it was built](#6-how-it-was-built)
+7. [Limits, and what production would need](#7-limits-and-what-production-would-need)
+8. [Credits and contact](#8-credits-and-contact)
 
 ---
 
-## 1. What this is
+## 1. What it is
 
-A working demo built by Sijia He in response to a question raised during her application for the Founder's EA role at Glot: *how do you produce a weekly shortlist of people to reach out to for open roles — and test which skills and backgrounds actually matter?*
+A weekly candidate outreach pipeline for a busy founder who wants a fresh shortlist every week — but doesn't yet know which skills and backgrounds actually predict a great hire.
 
-All candidates and activity are fictional. The roles and criteria are based on Glot's public job ads:
+The demo is set at **Northwind Labs, a 10-person AI startup**, hiring for five roles: Founding AI Engineer, Full Stack Engineer, Head of Engineering, Business Operations and Talent Partner. The company, the candidates and all activity are fictional.
 
-- [Founding AI Engineer](https://jobs.ashbyhq.com/glot/f529d4cb-dec4-4db8-987b-acc64bec9782)
-- [Full Stack Engineer](https://jobs.ashbyhq.com/glot/e1dfbeef-d771-4cc2-9d32-404a9c7311d6)
-- [Head of Engineering](https://jobs.ashbyhq.com/glot/1efd6395-c9d0-44e3-8195-4390745161f2)
-- [Business Operations](https://jobs.ashbyhq.com/glot/c1278e4e-078f-47c0-920d-2ce93234350c)
-- [Talent Partner](https://jobs.ashbyhq.com/glot/ebd0691d-9abd-46b2-9ae5-5eaa3cc807f8)
+## 2. The idea
 
-Not an official Glot product.
+Every criterion is a **hypothesis**: "people with this background turn out to be strong hires". A simple weekly loop tests each one:
 
-## 2. The problem
+1. **Criteria** — write down what you think predicts a great hire, with weights.
+2. **Sourcing** — search LinkedIn yourself; paste profiles you like and confirm the evidence.
+3. **Ranking** — everyone is scored against the weights, cautiously when evidence is thin.
+4. **Review** — the founder swipes through the weekly shortlist in a couple of minutes.
+5. **Coffee chats** — the real test of each assumption.
+6. **Learning** — check which criteria held up, and adjust the weights for next week.
 
-- The CEO wants a fresh shortlist every week, but doesn't have time to build one.
-- It isn't yet clear which skills and backgrounds predict a good hire.
-- Coffee chats are the real test — but what they teach is rarely written down.
-- When an assumption doesn't hold, the criteria need to be easy to change.
+## 3. How scoring works
 
-## 3. The idea
-
-Every criterion is a **hypothesis**: "people with this background turn out to be strong hires". The app runs a simple weekly loop that tests each one:
-
-1. **Define criteria** — write down what you think predicts a great hire, with weights.
-2. **Rank candidates** — everyone is scored against those weights.
-3. **CEO reviews shortlist** — a few minutes of swiping: approve, skip or star.
-4. **Outreach** — drafts are prepared; a person sends them.
-5. **Coffee chat** — the real test of each assumption.
-6. **Log feedback** — outcome and what you saw, in about 30 seconds.
-7. **Check which criteria hold up** — did high scorers actually do better in chats?
-8. **Update weights** — accept or dismiss a suggested change.
-9. **Next week's ranking** — the loop runs again with sharper criteria.
-
-## 4. How the scoring works
-
-- **Fit** is the weighted average of the ratings we have. A criterion with no evidence is left out — never counted as zero — because "not checked" isn't "can't".
-- **Cautious fit** is what we rank by. It treats the unknown part of a profile as neutral (50), so a thin profile with two great ratings can't jump to the top. With full evidence, cautious fit equals fit:
+- **Fit** is the weighted average of the ratings we have. Missing evidence is left out — never counted as zero — because "not checked" isn't "can't".
+- **Cautious fit** is what we rank by: the unknown part of a profile counts as neutral (50), so a thin profile with two great ratings can't jump to the top.
   `cautious fit = coverage × fit + (1 − coverage) × 50`
-- **Confidence** says how much to trust a score — not how good the person is:
-  `confidence = coverage × quality × verification` (strong evidence 1, weak 0.6; confirmed by a person 0.85, also seen in a coffee chat 1). High ≥ 65, Medium ≥ 40.
-- **Evidence matching** (Sourcing): pasted text is split into sentences; each is compared with every criterion's description and example phrases using sentence embeddings and cosine similarity, mixed 70/30 with keyword overlap. Strong ≥ 0.5, weak ≥ 0.35, otherwise missing. A person confirms every line.
+- **Confidence** says how much to trust a score: `coverage × quality × verification` (strong evidence 1, weak 0.6; confirmed by a person 0.85, also seen in a coffee chat 1). High ≥ 65, Medium ≥ 40.
+- **Evidence matching** (Sourcing): each sentence of a pasted profile is compared with each criterion's description and example phrases using sentence embeddings and cosine similarity, mixed 70/30 with keyword overlap. Strong ≥ 0.5, weak ≥ 0.35, otherwise missing. A person confirms every line.
 
 The app's **How it works** page (`/how-it-works`) has the formulas and a live worked example.
 
-## 5. User manual
+## 4. User manual
 
 ### Roles & Criteria
-1. Pick a role at the top.
+1. Pick a role at the top, or create one with **New role** — it starts with the three company-wide qualities (Builder, Curious problem-solver, Team-first).
 2. Drag a weight slider — the others rebalance so the total stays 100.
-3. Add, rename (pencil) or remove (bin) criteria.
+3. Add, rename (pencil) or remove (bin) criteria. **Delete role** removes a role you created.
 4. See every change, with time, under History.
-5. Open the job description from the link under the role summary.
 
 ### Sourcing
-1. Pick a role and a search type: Broad, Precise or Unconventional builders. Edit the text if you like.
-2. **Open in LinkedIn** runs the search in a new tab — you browse LinkedIn yourself. **Save** keeps the search.
-3. Paste a profile or CV you like (or **Try an example**), add the profile link if you have it, and choose **Match evidence**.
-4. An on-device model suggests strong, weak or missing evidence per criterion. Check and edit each line.
-5. **Confirm & save** adds the person to Candidates, ranked like everyone else. **Delete** removes them.
-6. Saved searches show how many people each search found, shortlisted, met and progressed.
+1. Pick a search type — Broad, Precise or Unconventional builders — and edit it if you like.
+2. **Open in LinkedIn** runs the search in a new tab; you browse LinkedIn yourself. **Save** keeps the search.
+3. Paste a profile you like (or **Try an example**) and choose **Match evidence**.
+4. Check each suggested line — strong, weak or missing — then **Confirm & save**.
+5. Saved searches show how many people each one found, shortlisted, met and progressed.
 
 ### Candidates
 1. The list is ranked live; rows that move are highlighted.
-2. Switch between Cautious (default) and Raw fit.
-3. Filter by fit, confidence and source.
-4. Click a person for evidence, must-haves and what to ask about.
-5. Use Contact to open an outreach draft (never sent automatically).
+2. Switch between Cautious (default) and Raw fit; filter by fit, confidence and source.
+3. Click a person for evidence, must-haves and what to ask about.
+4. **Contact** opens an outreach draft — never sent automatically.
 
 ### Pipeline
 1. **Generate shortlist** adds the top new candidates to Suggested.
 2. **Review shortlist** opens the swipe review in the app.
-3. Move people along the board with the buttons on each card.
-4. **Draft outreach** prepares a message that cites their strongest evidence.
-5. **Results by source** compares direct sourcing with agencies.
-6. **Weekly rhythm** shows who does what, and when.
+3. Move people along the board with the buttons on each card; **Draft outreach** cites their strongest evidence.
+4. **Results by source** compares direct sourcing with agencies; **Weekly rhythm** shows who does what.
 
-### CEO review
+### Founder review
 1. After Generate shortlist, choose **Copy link for CEO**.
-2. The CEO opens it on any phone: swipe right to approve, left to skip (one-tap reason), star for priority. Undo is always there.
-3. At the end, **Send decisions back** copies a results link.
-4. Open that link in the app and confirm **Import decisions**. In the same browser, decisions apply straight away.
+2. They swipe on any phone: right to approve, left to skip (one-tap reason), star for priority. Undo is always there.
+3. **Send decisions back** copies a results link; open it in the app and confirm the import.
 
 ### Learning
 1. Log feedback for each finished chat: outcome, what you saw, one line.
@@ -109,41 +81,21 @@ The app's **How it works** page (`/how-it-works`) has the formulas and a live wo
 3. Accept or dismiss the suggested weight change.
 
 ### Reset demo
-1. **Reset demo** (bottom of the sidebar) restores the original data.
+1. **Reset demo** (bottom of the sidebar) restores the original data and removes roles and profiles you added.
 
-## 6. A suggested weekly rhythm
+## 5. Privacy and fairness
 
-1. **Monday** — EA sources and scores candidates (~1 hour).
-2. **Tuesday** — CEO reviews the shortlist on their phone (~10 minutes).
-3. **Wednesday–Thursday** — EA sends outreach and books coffee chats.
-4. **Friday** — CEO logs chat feedback (~30 seconds each); EA reviews suggested weight changes.
-
-## 7. Privacy and fairness
-
-- All candidates in this demo are fictional.
-- Everything stays in your browser. There is no server, no account and no tracking.
+- All candidates and activity are fictional.
+- Everything you do stays in your browser. There is no server and no account.
 - Share links contain IDs only — never names or evidence.
 - No protected characteristics (photos, age, gender, nationality) are stored or used.
 - Scores support a human decision; they never make one. Nobody is contacted or rejected automatically.
-- No automated LinkedIn access, scraping or login. Profiles you paste are matched on your device; only the lines you confirm are kept, in your browser, until you delete them or reset.
+- No automated LinkedIn access, scraping or login. Pasted profiles are matched on your device; only lines you confirm are kept.
+- The live site uses Vercel Web Analytics for anonymous page-view counts (no cookies). No candidate data is sent.
 
-## 8. Limits, and what a real version needs
+## 6. How it was built
 
-This is a demo: data lives in one browser and samples are tiny. A real version would need:
-
-1. A shared database with login, so the CEO and EA see the same pipeline.
-2. A connection to Ashby, so approved people flow into the formal process.
-3. LinkedIn Recruiter or other approved sourcing tools.
-4. Real chat history over months, so the learning has enough data.
-5. A privacy review before any real candidate data is used.
-
-## 9. Built with
-
-React, TypeScript, Tailwind CSS and Vite, deployed on Vercel. Developed with Claude Code.
-
-Credits: evidence matching runs [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) (Apache 2.0; [browser version](https://huggingface.co/Xenova/all-MiniLM-L6-v2)) in the browser with [Transformers.js](https://huggingface.co/docs/transformers.js) (Apache 2.0) and [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) (MIT). Font: Plus Jakarta Sans (OFL 1.1). Licence texts: `public/licenses/`; see `THIRD_PARTY_NOTICES.md`.
-
-The quantized model files live in `public/models/` (served from this site; no requests to Hugging Face at runtime). `npm run fetch-model` re-downloads them and checks the SHA-256 Hugging Face publishes. The ONNX runtime files are copied into `public/ort/` before every build.
+Designed and directed by Sijia He using AI-assisted development with Claude Code. Delivered in reviewed phases — scoring, ranking, pipeline, learning, sourcing, then polish and an accessibility audit — with about 100 automated tests. React, TypeScript, Tailwind CSS and Vite, deployed on Vercel.
 
 ```bash
 npm install
@@ -152,10 +104,24 @@ npm test        # Vitest
 npm run build   # type-check + production build
 ```
 
-`vercel.json` rewrites every route (except `/models`, `/ort`, `/assets`) to `index.html`, so deep links work, and sets long immutable caching plus the right content types for the model (`.onnx`) and runtime (`.wasm`).
+`vercel.json` rewrites every route (except `/models`, `/ort`, `/assets`) to `index.html`, so deep links work, and sets long immutable caching plus the right content types for the model (`.onnx`) and runtime (`.wasm`). No backend; state lives in the browser's localStorage. See `CLAUDE.md` for the full product brief.
 
-**Check the on-device model on a deployment:** open `/sourcing`, click an example under *Try an example*. The review should say *"Suggested by an on-device matching model — please check."* (the keyword fallback says *"Suggested by keyword matching (model unavailable)"*). In DevTools → Network you should see `/models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx` and `/ort/<version>/ort-wasm-simd-threaded.jsep.wasm` load with status 200 from your own domain — and no requests to huggingface.co or any CDN. No backend; state lives in the browser's localStorage. See `CLAUDE.md` for the full product brief.
+The quantized model files live in `public/models/` (served from this site; no requests to Hugging Face at runtime). `npm run fetch-model` re-downloads them and checks the SHA-256 Hugging Face publishes. The ONNX runtime files are copied into `public/ort/` before every build.
 
-## 10. Contact
+**Check the on-device model on a deployment:** open `/sourcing`, click an example under *Try an example*. The review should say *"Suggested by an on-device matching model — please check."* (the keyword fallback says *"Suggested by keyword matching (model unavailable)"*). In DevTools → Network you should see `/models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx` and `/ort/<version>/ort-wasm-simd-threaded.jsep.wasm` load with status 200 from your own domain.
 
-Sijia He · [sijia.he116@outlook.com](mailto:sijia.he116@outlook.com?subject=Talent%20Scout%20demo)
+## 7. Limits, and what production would need
+
+This is a demo: data lives in one browser and samples are tiny. A production version would need:
+
+1. A shared database with login, so the founder and team see the same pipeline.
+2. A connection to your applicant tracking system (ATS) for the formal process.
+3. LinkedIn Recruiter or other approved sourcing tools.
+4. Months of real chat history, so the learning has enough data.
+5. A privacy review before any real candidate data is used.
+
+## 8. Credits and contact
+
+Evidence matching runs [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) (Apache 2.0; [browser version](https://huggingface.co/Xenova/all-MiniLM-L6-v2)) in the browser with [Transformers.js](https://huggingface.co/docs/transformers.js) (Apache 2.0) and [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) (MIT). Font: [Inter](https://github.com/rsms/inter) (OFL 1.1). Licence texts: `public/licenses/`; see `THIRD_PARTY_NOTICES.md`.
+
+Sijia He · [sijia.he116@outlook.com](mailto:sijia.he116@outlook.com?subject=Talent%20Scout)

@@ -1,4 +1,4 @@
-import { Check, ExternalLink, RotateCcw, RotateCw, Star, X } from 'lucide-react';
+import { Check, RotateCcw, RotateCw, Star, X } from 'lucide-react';
 import {
   forwardRef,
   useCallback,
@@ -364,16 +364,7 @@ const SwipeCard = forwardRef<
           >
             <RotateCw className="h-3.5 w-3.5" /> {flipped ? 'Summary' : 'Full evidence'}
           </button>
-          {role.jdUrl && (
-            <a
-              href={role.jdUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-medium text-ink-900 underline decoration-ink-300 underline-offset-4 hover:decoration-ink-900"
-            >
-              Job description <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
+
         </div>
       </div>
     </div>

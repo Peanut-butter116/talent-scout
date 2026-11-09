@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom';
 
 export const CONTACT_NAME = 'Sijia He';
 export const CONTACT_EMAIL = 'sijia.he116@outlook.com';
-export const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Talent Scout demo')}`;
+export const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Talent Scout')}`;
 
 /** The one credit line, shown once per page in the footer. */
 export function CreditLine({ className = '', withAbout = false }: { className?: string; withAbout?: boolean }) {
   return (
     <p className={`text-xs leading-relaxed text-ink-400 ${className}`}>
-      Candidate outreach demo for Glot · Built by {CONTACT_NAME} · Not an official Glot product ·{' '}
+      A portfolio project by {CONTACT_NAME} ·{' '}
       <a href={CONTACT_HREF} className="text-ink-600 underline decoration-ink-300 underline-offset-2 hover:text-ink-900">
         Contact
       </a>

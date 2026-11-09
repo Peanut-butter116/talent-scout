@@ -208,7 +208,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
                 </div>
                 {step === 0 && (
                   <p className="mt-2 text-sm text-ink-300">
-                    Welcome to Talent Scout — a weekly shortlist that learns which hiring criteria really work. Candidates are
+                    Welcome to Talent Scout. Northwind Labs, a 10-person AI startup, is hiring for five roles. Candidates are
                     fictional; your edits stay in this browser.
                   </p>
                 )}

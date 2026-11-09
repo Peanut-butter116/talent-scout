@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 import { AppStateProvider } from './state/AppState';
-import '@fontsource-variable/plus-jakarta-sans';
+import '@fontsource-variable/inter';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(

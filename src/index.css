@@ -2,29 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* STYLE (matched to glot.com): white page, near-black ink #111, warm greys, black pill
-   buttons, Plus Jakarta Sans, 16px card radius, borderless warm-grey surfaces. */
+/* STYLE: white page, near-black ink, neutral greys, ONE deep-indigo accent for primary
+   buttons, links and focus; Inter; pill buttons; 16px cards; borderless grey surfaces. */
 
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
   body { @apply bg-white text-ink-900 antialiased; }
   h1, h2, h3 { @apply tracking-tightish; }
   /* Visible keyboard focus everywhere (mouse clicks don't show it). */
-  :focus-visible { outline: 2px solid #111111; outline-offset: 2px; border-radius: 6px; }
+  :focus-visible { outline: 2px solid #4338ca; outline-offset: 2px; border-radius: 6px; }
   .skip-link { @apply sr-only; }
-  .tour-target { outline: 2px solid #111111 !important; outline-offset: 4px; border-radius: 12px; box-shadow: 0 0 0 8px rgb(17 17 17 / 0.08); }
+  .tour-target { outline: 2px solid #4338ca !important; outline-offset: 4px; border-radius: 12px; box-shadow: 0 0 0 8px rgb(67 56 202 / 0.12); }
   .skip-link:focus { @apply not-sr-only fixed left-3 top-3 z-[100] rounded-full bg-ink-900 px-4 py-2 text-sm text-white; }
 }
 
 @layer components {
   .card { @apply rounded-2xl bg-ink-50; }
   .surface { @apply rounded-2xl bg-white ring-1 ring-ink-100; }
-  .btn { @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40; }
-  .btn-primary { @apply btn bg-ink-900 text-white hover:bg-ink-700; }
-  .btn-teal { @apply btn bg-ink-900 text-white hover:bg-ink-700; }
+  .btn { @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40; }
+  .btn-primary { @apply btn bg-accent-700 text-white hover:bg-accent-800; }
+  .btn-teal { @apply btn bg-accent-700 text-white hover:bg-accent-800; }
   .btn-secondary { @apply btn bg-white text-ink-900 ring-1 ring-ink-200 hover:bg-ink-50; }
   .btn-ghost { @apply btn text-ink-600 hover:bg-ink-100 hover:text-ink-900; }
   .chip { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap; }
-  .input { @apply w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10; }
+  .input { @apply w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-700/15; }
   .label { @apply text-xs font-medium text-ink-500; }
 }

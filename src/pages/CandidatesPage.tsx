@@ -6,7 +6,6 @@ import { WeightSlider } from '../components/CriterionRow';
 import { EmptyState } from '../components/EmptyState';
 import { HowCalculated } from '../components/HowCalculated';
 import { HowItWorksLink } from '../components/HowItWorksLink';
-import { JdLink } from '../components/JdLink';
 import { PageHeader } from '../components/PageHeader';
 import { ProfileLink } from '../components/ProfileActions';
 import { RoleSelector } from '../components/RoleSelector';
@@ -59,12 +58,7 @@ export function CandidatesPage() {
       <PageHeader
         title="Candidates"
         subtitle="Ranked live against the role's criteria."
-        actions={
-          <>
-            <JdLink role={role} />
-            <HowItWorksLink />
-          </>
-        }
+        actions={<HowItWorksLink />}
       />
       <RoleSelector />
 
